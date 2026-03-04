@@ -5,17 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚗 Car Marketing App</title>
 <style>
-  body { margin:0; font-family: Arial; background:#f4f4f4; color:#333; overflow-x:hidden; }
+  body { margin:0; font-family: Arial; background:#f4f4f4; color:#333; overflow:hidden; }
   h2,h3 { margin:10px 0; }
   button { padding:10px; margin:3px 0; border:none; border-radius:8px; background:#4CAF50; color:white; font-size:16px; width:100%; }
   input, textarea { width:100%; padding:8px; margin:3px 0; border:1px solid #ccc; border-radius:6px; font-size:16px; }
-  .screen { display:none; padding:10px; box-sizing:border-box; max-height: calc(100vh - 60px); overflow-y:auto; } /* scroll only inside screen if needed */
+  .screen { display:none; padding:10px; box-sizing:border-box; height: calc(100vh - 60px); overflow-y:auto; }
   .card { background:white; border-radius:8px; padding:10px; margin:10px 0; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
   .bottom-nav { position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; background:#fff; border-top:1px solid #ccc; padding:8px 0; z-index:999; }
   .bottom-nav button { width:24%; font-size:16px; }
   .emoji { margin-right:5px; }
   #generatedPost { background:#fff; padding:8px; border-radius:8px; margin:5px 0; white-space:pre-line; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-  .media-preview img, .media-preview video { max-width:100%; max-height:150px; margin:3px 0; border-radius:6px; object-fit:cover; }
+  .media-preview { display:flex; overflow-x:auto; gap:5px; margin:5px 0; }
+  .media-preview img, .media-preview video { max-width:120px; max-height:120px; border-radius:6px; object-fit:cover; }
 </style>
 </head>
 <body>
@@ -28,7 +29,7 @@
   <p id="pinMessage" style="color:red;"></p>
 </div>
 
-<!-- Dashboard / Create Post Screen -->
+<!-- Dashboard Screen -->
 <div id="dashboardScreen" class="screen">
   <h2>🏠 Create Car Post</h2>
   <input type="text" id="carName" placeholder="Car Name">
@@ -75,104 +76,66 @@
 
 <script>
   // ---------------- PIN Logic ----------------
-  if(!localStorage.getItem("dealerPIN")){
-    localStorage.setItem("dealerPIN","1234"); // default PIN
-  }
-
+  if(!localStorage.getItem("dealerPIN")) localStorage.setItem("dealerPIN","1234");
   function checkPin(){
-    const pin = document.getElementById("pinInput").value;
-    if(pin === localStorage.getItem("dealerPIN")){
+    const pin=document.getElementById("pinInput").value;
+    if(pin===localStorage.getItem("dealerPIN")){
       document.getElementById("pinScreen").style.display="none";
       showScreen('dashboardScreen');
       loadHistory();
-    } else {
-      document.getElementById("pinMessage").innerText="Incorrect PIN!";
-    }
+    } else document.getElementById("pinMessage").innerText="Incorrect PIN!";
   }
-
   function changePin(){
-    const newPin = document.getElementById("newPin").value;
-    if(newPin.length===4){
-      localStorage.setItem("dealerPIN",newPin);
-      alert("PIN changed successfully!");
-      document.getElementById("newPin").value="";
-    } else { alert("PIN must be 4 digits!"); }
+    const newPin=document.getElementById("newPin").value;
+    if(newPin.length===4){ localStorage.setItem("dealerPIN",newPin); alert("PIN changed!"); document.getElementById("newPin").value=""; }
+    else alert("PIN must be 4 digits!");
   }
 
   // ---------------- Screen Navigation ----------------
   function showScreen(screenId){
-    const screens=['dashboardScreen','historyScreen','settingsScreen','profileScreen','pinScreen'];
-    screens.forEach(s=>document.getElementById(s).style.display='none');
+    ['dashboardScreen','historyScreen','settingsScreen','profileScreen','pinScreen'].forEach(s=>document.getElementById(s).style.display='none');
     document.getElementById(screenId).style.display='block';
   }
 
   // ---------------- Car / Post Logic ----------------
-  let selectedFiles = [];
-
-  document.getElementById("carMedia").addEventListener("change", (e)=>{
-    selectedFiles = Array.from(e.target.files);
-    const preview = document.getElementById("mediaPreview");
-    preview.innerHTML="";
+  let selectedFiles=[];
+  document.getElementById("carMedia").addEventListener("change",(e)=>{
+    selectedFiles=Array.from(e.target.files);
+    const preview=document.getElementById("mediaPreview"); preview.innerHTML="";
     selectedFiles.forEach(file=>{
-      const url = URL.createObjectURL(file);
-      if(file.type.startsWith("image")){
-        const img = document.createElement("img");
-        img.src=url;
-        preview.appendChild(img);
-      } else if(file.type.startsWith("video")){
-        const vid = document.createElement("video");
-        vid.src=url;
-        vid.controls=true;
-        preview.appendChild(vid);
-      }
+      const url=URL.createObjectURL(file);
+      if(file.type.startsWith("image")){ const img=document.createElement("img"); img.src=url; preview.appendChild(img); }
+      else if(file.type.startsWith("video")){ const vid=document.createElement("video"); vid.src=url; vid.controls=true; preview.appendChild(vid); }
     });
   });
 
   function generatePost(){
-    const name = document.getElementById("carName").value;
-    const year = document.getElementById("carYear").value;
-    const price = document.getElementById("carPrice").value;
-    const condition = document.getElementById("carCondition").value;
-    const notes = document.getElementById("carNotes").value;
-
-    if(!name || !year || !price){
-      alert("Please fill Name, Year, Price!");
-      return;
-    }
-
+    const name=document.getElementById("carName").value;
+    const year=document.getElementById("carYear").value;
+    const price=document.getElementById("carPrice").value;
+    const condition=document.getElementById("carCondition").value;
+    const notes=document.getElementById("carNotes").value;
+    if(!name || !year || !price){ alert("Please fill Name, Year, Price!"); return; }
     const post=`🚗 *${name}*\n📅 Year: ${year}\n💰 Price: ₦${price}\n🔧 Condition: ${condition}\n✨ Notes: ${notes || '-'}\n📱 Contact me for details!`;
-
     document.getElementById("generatedPost").innerText=post;
 
-    // Save to history with files
-    let history = JSON.parse(localStorage.getItem("postHistory")) || [];
-    const mediaData = selectedFiles.map(f=>({name:f.name,type:f.type}));
+    let history=JSON.parse(localStorage.getItem("postHistory"))||[];
+    const mediaData=selectedFiles.map(f=>({name:f.name,type:f.type}));
     history.push({name,year,price,condition,notes,post,media:mediaData});
-    localStorage.setItem("postHistory", JSON.stringify(history));
+    localStorage.setItem("postHistory",JSON.stringify(history));
     loadHistory();
   }
 
-  function copyPost(){
-    const text = document.getElementById("generatedPost").innerText;
-    navigator.clipboard.writeText(text).then(()=>alert("Post copied to clipboard!"));
-  }
-
-  function sharePost(){
-    const text = document.getElementById("generatedPost").innerText;
-    if(navigator.share){
-      navigator.share({text});
-    } else { alert("Sharing not supported on this browser."); }
-  }
+  function copyPost(){ navigator.clipboard.writeText(document.getElementById("generatedPost").innerText).then(()=>alert("Post copied!")); }
+  function sharePost(){ const text=document.getElementById("generatedPost").innerText; if(navigator.share) navigator.share({text}); else alert("Sharing not supported."); }
 
   function loadHistory(){
-    const historyList = document.getElementById("historyList");
-    historyList.innerHTML="";
-    let history = JSON.parse(localStorage.getItem("postHistory")) || [];
-    history.forEach((item,index)=>{
-      const div = document.createElement("div");
-      div.className="card";
+    const list=document.getElementById("historyList"); list.innerHTML="";
+    let history=JSON.parse(localStorage.getItem("postHistory"))||[];
+    history.forEach(item=>{
+      const div=document.createElement("div"); div.className="card";
       div.innerHTML=`🚗 <strong>${item.name}</strong><br>Year: ${item.year} | Price: ₦${item.price} | Condition: ${item.condition}<br>Notes: ${item.notes || '-'}<br><pre>${item.post}</pre>`;
-      historyList.appendChild(div);
+      list.appendChild(div);
     });
   }
 
@@ -181,4 +144,4 @@
 </script>
 
 </body>
-  </html>
+</html>
