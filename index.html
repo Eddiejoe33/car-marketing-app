@@ -15,6 +15,7 @@
   .bottom-nav button { width:25%; font-size:18px; }
   .emoji { margin-right:5px; }
   #generatedPost { background:#fff; padding:10px; border-radius:8px; margin:10px 0; white-space:pre-line; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+  .media-preview img, .media-preview video { max-width:100%; margin:5px 0; border-radius:6px; }
 </style>
 </head>
 <body>
@@ -35,9 +36,11 @@
   <input type="text" id="carPrice" placeholder="Price">
   <input type="text" id="carCondition" placeholder="Condition (New / Used)">
   <textarea id="carNotes" placeholder="Notes / Description"></textarea>
+  <input type="file" id="carMedia" accept="image/*,video/*" multiple>
   <button onclick="generatePost()">Generate Post</button>
-  
+
   <div id="generatedPost"></div>
+  <div class="media-preview" id="mediaPreview"></div>
   <button onclick="copyPost()">📋 Copy Post</button>
   <button onclick="sharePost()">📤 Share Post</button>
 </div>
@@ -104,6 +107,27 @@
   }
 
   // ---------------- Car / Post Logic ----------------
+  let selectedFiles = [];
+
+  document.getElementById("carMedia").addEventListener("change", (e)=>{
+    selectedFiles = Array.from(e.target.files);
+    const preview = document.getElementById("mediaPreview");
+    preview.innerHTML="";
+    selectedFiles.forEach(file=>{
+      const url = URL.createObjectURL(file);
+      if(file.type.startsWith("image")){
+        const img = document.createElement("img");
+        img.src=url;
+        preview.appendChild(img);
+      } else if(file.type.startsWith("video")){
+        const vid = document.createElement("video");
+        vid.src=url;
+        vid.controls=true;
+        preview.appendChild(vid);
+      }
+    });
+  });
+
   function generatePost(){
     const name = document.getElementById("carName").value;
     const year = document.getElementById("carYear").value;
@@ -120,9 +144,10 @@
 
     document.getElementById("generatedPost").innerText=post;
 
-    // Save to history
+    // Save to history with files
     let history = JSON.parse(localStorage.getItem("postHistory")) || [];
-    history.push({name,year,price,condition,notes,post});
+    const mediaData = selectedFiles.map(f=>({name:f.name,type:f.type}));
+    history.push({name,year,price,condition,notes,post,media:mediaData});
     localStorage.setItem("postHistory", JSON.stringify(history));
     loadHistory();
   }
@@ -156,4 +181,4 @@
 </script>
 
 </body>
-</html>
+  </html>
