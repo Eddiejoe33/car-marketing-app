@@ -1,179 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚗 Car Marketing App</title>
+
 <style>
-  html, body {
-    margin:0;
-    padding:0;
-    font-family: Arial;
-    height: 100%;
-    background:#f4f4f4;
-    overflow: hidden; /* prevent scroll */
-  }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, sans-serif;
+}
 
-  /* Container taking full screen except bottom nav */
-  .screen-wrapper {
-    height: calc(100% - 60px); /* leave room for bottom nav */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding:10px;
-    box-sizing: border-box;
-  }
+body{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  background:#0f172a;
+  color:white;
+  overflow:hidden; /* THIS STOPS SCROLL */
+}
 
-  h2 { margin:8px 0; font-size:20px; }
-  input, textarea { width:100%; padding:8px; margin:3px 0; border:1px solid #ccc; border-radius:6px; font-size:16px; }
-  button { padding:10px; margin:3px 0; border:none; border-radius:8px; background:#4CAF50; color:white; font-size:16px; width:100%; }
-  #generatedPost { background:#fff; padding:8px; border-radius:8px; margin:5px 0; white-space: pre-line; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-  .media-preview { display:flex; flex-wrap: nowrap; gap:5px; margin:5px 0; overflow-x:auto; }
-  .media-preview img, .media-preview video { max-width:100px; max-height:100px; border-radius:6px; object-fit:cover; }
+/* MAIN CONTENT */
+.main{
+  flex:1;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
 
-  /* Bottom nav fixed */
-  .bottom-nav {
-    height:60px;
-    display:flex;
-    justify-content:space-around;
-    align-items:center;
-    background:#fff;
-    border-top:1px solid #ccc;
-  }
-  .bottom-nav button { width:24%; font-size:16px; }
+/* HEADER */
+.header{
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+/* FORM */
+.form input,
+.form select{
+  width:100%;
+  padding:8px;
+  margin-bottom:6px;
+  border:none;
+  border-radius:6px;
+  background:#1e293b;
+  color:white;
+  font-size:13px;
+}
+
+/* FILE UPLOAD */
+.file-box{
+  background:#1e293b;
+  padding:6px;
+  border-radius:6px;
+  font-size:12px;
+  margin-bottom:6px;
+}
+
+/* BUTTONS */
+button{
+  width:100%;
+  padding:8px;
+  margin-bottom:6px;
+  border:none;
+  border-radius:6px;
+  background:#2563eb;
+  color:white;
+  font-weight:bold;
+  font-size:13px;
+}
+
+button:active{
+  transform:scale(0.97);
+}
+
+/* OUTPUT */
+.output{
+  background:#1e293b;
+  padding:6px;
+  border-radius:6px;
+  font-size:12px;
+  min-height:60px;
+  overflow:auto;
+}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  height:55px;
+  background:#111827;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  font-size:12px;
+  border-top:1px solid #1f2937;
+}
+
+.bottom-nav div{
+  text-align:center;
+}
 </style>
 </head>
+
 <body>
 
-<!-- PIN Screen -->
-<div id="pinScreen" class="screen-wrapper">
-  <h2>🔐 Enter 4-Digit PIN</h2>
-  <input type="password" id="pinInput" maxlength="4" placeholder="****">
-  <button onclick="checkPin()">Enter</button>
-  <p id="pinMessage" style="color:red;"></p>
+<div class="main">
+
+  <div>
+    <div class="header">🚗 Create Car Advert</div>
+
+    <div class="form">
+      <input type="text" id="carName" placeholder="Car Name">
+      <input type="text" id="year" placeholder="Year">
+      <input type="text" id="price" placeholder="Price">
+      <select id="condition">
+        <option>Condition</option>
+        <option>Brand New</option>
+        <option>Foreign Used</option>
+        <option>Nigerian Used</option>
+      </select>
+    </div>
+
+    <div class="file-box">
+      📸 Upload Image / Video
+      <input type="file" id="media" style="margin-top:4px;">
+    </div>
+
+    <button onclick="generatePost()">✨ Generate Post</button>
+    <button onclick="sharePost()">📤 Share Post</button>
+  </div>
+
+  <div class="output" id="result">
+    Your generated advert will appear here...
+  </div>
+
 </div>
 
-<!-- Dashboard Screen -->
-<div id="dashboardScreen" class="screen-wrapper" style="display:none;">
-  <h2>🏠 Create Car Post</h2>
-  <input type="text" id="carName" placeholder="Car Name">
-  <input type="text" id="carYear" placeholder="Year">
-  <input type="text" id="carPrice" placeholder="Price">
-  <input type="text" id="carCondition" placeholder="Condition (New / Used)">
-  <textarea id="carNotes" placeholder="Notes / Description"></textarea>
-  <input type="file" id="carMedia" accept="image/*,video/*" multiple>
-
-  <button onclick="generatePost()">Generate Post</button>
-  <div id="generatedPost"></div>
-  <div class="media-preview" id="mediaPreview"></div>
-  <button onclick="sharePost()">📤 Share Post</button>
-</div>
-
-<!-- History Screen -->
-<div id="historyScreen" class="screen-wrapper" style="display:none;">
-  <h2>📚 Post History</h2>
-  <div id="historyList"></div>
-</div>
-
-<!-- Settings Screen -->
-<div id="settingsScreen" class="screen-wrapper" style="display:none;">
-  <h2>⚙️ Settings</h2>
-  <input type="password" id="newPin" maxlength="4" placeholder="Enter New PIN">
-  <button onclick="changePin()">Change PIN</button>
-</div>
-
-<!-- Profile Screen -->
-<div id="profileScreen" class="screen-wrapper" style="display:none;">
-  <h2>👤 Profile</h2>
-  <p>Name: <span id="dealerName">Dealer</span></p>
-  <p>Phone: <span id="dealerPhone">+234xxxxxxxxx</span></p>
-</div>
-
-<!-- Bottom Navigation -->
 <div class="bottom-nav">
-  <button onclick="showScreen('dashboardScreen')">🏠 Dashboard</button>
-  <button onclick="showScreen('historyScreen')">📚 History</button>
-  <button onclick="showScreen('settingsScreen')">⚙️ Settings</button>
-  <button onclick="showScreen('profileScreen')">👤 Profile</button>
+  <div>🏠 Dashboard</div>
+  <div>🕘 History</div>
+  <div>⚙ Settings</div>
+  <div>👤 Profile</div>
 </div>
 
 <script>
-  // ---------------- PIN Logic ----------------
-  if(!localStorage.getItem("dealerPIN")) localStorage.setItem("dealerPIN","1234");
-  function checkPin(){
-    const pin=document.getElementById("pinInput").value;
-    if(pin===localStorage.getItem("dealerPIN")){
-      document.getElementById("pinScreen").style.display="none";
-      showScreen('dashboardScreen');
-      loadHistory();
-    } else document.getElementById("pinMessage").innerText="Incorrect PIN!";
-  }
-  function changePin(){
-    const newPin=document.getElementById("newPin").value;
-    if(newPin.length===4){ 
-      localStorage.setItem("dealerPIN",newPin); 
-      alert("PIN changed!"); 
-      document.getElementById("newPin").value=""; 
-    }
-    else alert("PIN must be 4 digits!");
-  }
+function generatePost(){
+  let name = document.getElementById("carName").value;
+  let year = document.getElementById("year").value;
+  let price = document.getElementById("price").value;
+  let condition = document.getElementById("condition").value;
 
-  // ---------------- Screen Navigation ----------------
-  function showScreen(screenId){
-    ['dashboardScreen','historyScreen','settingsScreen','profileScreen','pinScreen'].forEach(s=>{
-      document.getElementById(s).style.display='none';
+  let post = `🚗 ${name} (${year})
+💰 Price: ${price}
+📌 Condition: ${condition}
+
+🔥 Clean and affordable ride!
+📲 DM now to secure this deal!`;
+
+  document.getElementById("result").innerText = post;
+}
+
+function sharePost(){
+  let text = document.getElementById("result").innerText;
+
+  if(navigator.share){
+    navigator.share({
+      title: "Car Advert",
+      text: text
     });
-    document.getElementById(screenId).style.display='flex';
+  } else {
+    alert("Sharing not supported on this device.");
   }
-
-  // ---------------- Car / Post Logic ----------------
-  let selectedFiles=[];
-  document.getElementById("carMedia").addEventListener("change",(e)=>{
-    selectedFiles=Array.from(e.target.files);
-    const preview=document.getElementById("mediaPreview"); preview.innerHTML="";
-    selectedFiles.forEach(file=>{
-      const url=URL.createObjectURL(file);
-      if(file.type.startsWith("image")){ const img=document.createElement("img"); img.src=url; preview.appendChild(img); }
-      else if(file.type.startsWith("video")){ const vid=document.createElement("video"); vid.src=url; vid.controls=true; preview.appendChild(vid); }
-    });
-  });
-
-  function generatePost(){
-    const name=document.getElementById("carName").value;
-    const year=document.getElementById("carYear").value;
-    const price=document.getElementById("carPrice").value;
-    const condition=document.getElementById("carCondition").value;
-    const notes=document.getElementById("carNotes").value;
-    if(!name || !year || !price){ alert("Please fill Name, Year, Price!"); return; }
-    const post=`🚗 *${name}*\n📅 Year: ${year}\n💰 Price: ₦${price}\n🔧 Condition: ${condition}\n✨ Notes: ${notes || '-'}\n📱 Contact me for details!`;
-    document.getElementById("generatedPost").innerText=post;
-
-    let history=JSON.parse(localStorage.getItem("postHistory"))||[];
-    const mediaData=selectedFiles.map(f=>({name:f.name,type:f.type}));
-    history.push({name,year,price,condition,notes,post,media:mediaData});
-    localStorage.setItem("postHistory",JSON.stringify(history));
-    loadHistory();
-  }
-
-  function sharePost(){ 
-    const text=document.getElementById("generatedPost").innerText; 
-    if(navigator.share) navigator.share({text}); 
-    else alert("Sharing not supported."); 
-  }
-
-  function loadHistory(){
-    const list=document.getElementById("historyList"); list.innerHTML="";
-    let history=JSON.parse(localStorage.getItem("postHistory"))||[];
-    history.forEach(item=>{
-      const div=document.createElement("div"); div.className="card";
-      div.innerHTML=`🚗 <strong>${item.name}</strong><br>Year: ${item.year} | Price: ₦${item.price} | Condition: ${item.condition}<br>Notes: ${item.notes || '-'}<br><pre>${item.post}</pre>`;
-      list.appendChild(div);
-    });
-  }
-
-  // ---------------- Initial Load ----------------
-  document.getElementById("pinScreen").style.display="flex";
+}
 </script>
 
 </body>
-    </html>
+</html>
