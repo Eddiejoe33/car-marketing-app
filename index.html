@@ -14,40 +14,50 @@
 
 html,body{
   height:100%;
-  overflow:hidden;
   background:#0f172a;
   color:white;
+  overflow:hidden;
 }
 
+/* APP WRAPPER */
 .app{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
+  height:100%;
   display:flex;
   flex-direction:column;
 }
 
-.page{
+/* PAGE AREA */
+.page-container{
   flex:1;
-  display:none;
+  position:relative;
+}
+
+/* EACH PAGE */
+.page{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:60px; /* Leave space for bottom nav */
   padding:14px;
+  display:none;
   flex-direction:column;
   justify-content:space-between;
 }
 
-.page.active-page{
+.page.active{
   display:flex;
 }
 
+/* HEADER */
 .header{
   text-align:center;
-  font-weight:bold;
   font-size:22px;
-  margin-bottom:12px;
+  font-weight:bold;
+  margin-bottom:10px;
 }
 
+/* FORM */
 input, select{
   width:100%;
   padding:10px;
@@ -59,14 +69,15 @@ input, select{
   font-size:15px;
 }
 
+/* FILE */
 .file-box{
   background:#1e293b;
   padding:10px;
   border-radius:8px;
-  font-size:14px;
   margin-bottom:8px;
 }
 
+/* BUTTONS */
 button{
   width:100%;
   padding:10px;
@@ -79,30 +90,37 @@ button{
   font-size:15px;
 }
 
+/* OUTPUT */
 .output{
   background:#1e293b;
   padding:10px;
   border-radius:8px;
   font-size:14px;
-  height:90px;
+  height:80px;
   overflow:auto;
 }
 
+/* FIXED BOTTOM NAV */
 .bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
   height:60px;
   background:#111827;
   display:flex;
   justify-content:space-around;
   align-items:center;
-  font-size:14px;
   border-top:1px solid #1f2937;
+  z-index:1000;
 }
 
 .nav-item{
   flex:1;
   text-align:center;
-  padding-top:6px;
   color:#9ca3af;
+  font-size:14px;
+  padding-top:6px;
   transition:0.3s;
 }
 
@@ -118,79 +136,79 @@ button{
 
 <div class="app">
 
-  <!-- DASHBOARD PAGE -->
-  <div class="page active-page" id="dashboardPage">
-    <div>
-      <div class="header">🚗 Create Car Advert</div>
+  <div class="page-container">
 
-      <input type="text" id="carName" placeholder="Car Name">
-      <input type="text" id="year" placeholder="Year">
-      <input type="text" id="price" placeholder="Price">
-      <select id="condition">
-        <option>Condition</option>
-        <option>Brand New</option>
-        <option>Foreign Used</option>
-        <option>Nigerian Used</option>
-      </select>
+    <!-- DASHBOARD -->
+    <div class="page active" id="dashboard">
+      <div>
+        <div class="header">🚗 Create Car Advert</div>
 
-     <input type="file" id="mediaInput" multiple accept="image/*,video/*">
-        📸 Upload Image / Video
-        <input type="file">
+        <input type="text" id="carName" placeholder="Car Name">
+        <input type="text" id="year" placeholder="Year">
+        <input type="text" id="price" placeholder="Price">
+        <select id="condition">
+          <option>Condition</option>
+          <option>Brand New</option>
+          <option>Foreign Used</option>
+          <option>Nigerian Used</option>
+        </select>
+
+        <div class="file-box">
+          📸 Upload Images
+          <input type="file" id="mediaInput" multiple accept="image/*">
+        </div>
+
+        <button onclick="generatePost()">✨ Generate Post</button>
+        <button onclick="sharePost()">📤 Share Post</button>
       </div>
 
-      <button onclick="generatePost()">✨ Generate Post</button>
-      <button onclick="sharePost()">📤 Share Post</button>
+      <div class="output" id="result">
+        Your generated advert will appear here...
+      </div>
     </div>
 
-    <div class="output" id="result">
-      Your generated advert will appear here...
+    <!-- HISTORY -->
+    <div class="page" id="history">
+      <div class="header">🕘 History</div>
+      <div class="output">No posts yet.</div>
     </div>
-  </div>
 
-  <!-- HISTORY PAGE -->
-  <div class="page" id="historyPage">
-    <div class="header">🕘 Post History</div>
-    <div class="output" style="height:70%;">
-      No posts yet...
+    <!-- SETTINGS -->
+    <div class="page" id="settings">
+      <div class="header">⚙ Settings</div>
+      <input type="text" placeholder="Change Dealer Name">
+      <input type="password" placeholder="Change PIN">
+      <button>Save Settings</button>
     </div>
-  </div>
 
-  <!-- SETTINGS PAGE -->
-  <div class="page" id="settingsPage">
-    <div class="header">⚙ Settings</div>
-    <input type="text" placeholder="Change Dealer Name">
-    <input type="password" placeholder="Change PIN">
-    <button>Save Settings</button>
-  </div>
-
-  <!-- PROFILE PAGE -->
-  <div class="page" id="profilePage">
-    <div class="header">👤 Profile</div>
-    <div class="output" style="height:70%;">
-      <strong>Dealer Name:</strong> Eddie Motors<br><br>
-      <strong>Phone:</strong> +234xxxxxxxxxx<br><br>
-      <strong>Status:</strong> Active Dealer
+    <!-- PROFILE -->
+    <div class="page" id="profile">
+      <div class="header">👤 Profile</div>
+      <div class="output">
+        Dealer: Eddie Motors<br><br>
+        Status: Active
+      </div>
     </div>
+
   </div>
 
-  <!-- BOTTOM NAV -->
+  <!-- FIXED BOTTOM NAV -->
   <div class="bottom-nav">
-    <div class="nav-item active" onclick="switchPage('dashboardPage', this)">🏠 Dashboard</div>
-    <div class="nav-item" onclick="switchPage('historyPage', this)">🕘 History</div>
-    <div class="nav-item" onclick="switchPage('settingsPage', this)">⚙ Settings</div>
-    <div class="nav-item" onclick="switchPage('profilePage', this)">👤 Profile</div>
+    <div class="nav-item active" onclick="switchPage('dashboard', this)">🏠 Dashboard</div>
+    <div class="nav-item" onclick="switchPage('history', this)">🕘 History</div>
+    <div class="nav-item" onclick="switchPage('settings', this)">⚙ Settings</div>
+    <div class="nav-item" onclick="switchPage('profile', this)">👤 Profile</div>
   </div>
 
 </div>
 
 <script>
-
 function switchPage(pageId, element){
   document.querySelectorAll('.page').forEach(p=>{
-    p.classList.remove('active-page');
+    p.classList.remove('active');
   });
 
-  document.getElementById(pageId).classList.add('active-page');
+  document.getElementById(pageId).classList.add('active');
 
   document.querySelectorAll('.nav-item').forEach(n=>{
     n.classList.remove('active');
@@ -214,27 +232,23 @@ function generatePost(){
 
   document.getElementById("result").innerText = post;
 }
+
 async function sharePost() {
   const text = document.getElementById("result").innerText;
-  const fileInput = document.querySelector("input[type='file']");
-  const files = fileInput.files;
+  const input = document.getElementById("mediaInput");
+  const files = Array.from(input.files);
 
   if (navigator.canShare && navigator.canShare({ files })) {
-    try {
-      await navigator.share({
-        title: "Car Advert",
-        text: text,
-        files: files
-      });
-    } catch (error) {
-      alert("Sharing failed.");
-    }
+    await navigator.share({
+      title: "Car Advert",
+      text: text,
+      files: files
+    });
   } else {
-    alert("Your browser does not support image sharing.");
+    alert("Sharing not supported on this browser.");
   }
-  }
-
+}
 </script>
 
 </body>
-  </html>
+        </html>
