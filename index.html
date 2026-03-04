@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Car Marketing App</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    #pinScreen, #dashboard { display: none; }
+    input { padding: 8px; margin: 5px 0; width: 100%; }
+    button { padding: 10px; margin-top: 10px; width: 100%; }
+    .car-item { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <!-- PIN Screen -->
+  <div id="pinScreen">
+    <h2>Enter 4-Digit PIN</h2>
+    <input type="password" id="pinInput" maxlength="4" placeholder="****">
+    <button onclick="checkPin()">Enter</button>
+    <p id="pinMessage" style="color:red;"></p>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard">
+    <h2>Car Marketing Dashboard</h2>
+    <button onclick="showAddCar()">Add New Car</button>
+    <div id="addCarForm" style="display:none;">
+      <input type="text" id="carName" placeholder="Car Name">
+      <input type="text" id="carYear" placeholder="Year">
+      <input type="text" id="carPrice" placeholder="Price">
+      <button onclick="addCar()">Save Car</button>
+    </div>
+    <h3>Active Cars</h3>
+    <div id="carList"></div>
+  </div>
+
+  <script>
+    // PIN Logic
+    if (!localStorage.getItem("dealerPIN")) {
+      // First time setup: default PIN
+      localStorage.setItem("dealerPIN", "1234");
+    }
+    document.getElementById("pinScreen").style.display = "block";
+
+    function checkPin() {
+      const pin = document.getElementById("pinInput").value;
+      if (pin === localStorage.getItem("dealerPIN")) {
+        document.getElementById("pinScreen").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        loadCars();
+      } else {
+        document.getElementById("pinMessage").innerText = "Incorrect PIN!";
+      }
+    }
+
+    // Show Add Car Form
+    function showAddCar() {
+      const form = document.getElementById("addCarForm");
+      form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    // Add Car
+    function addCar() {
+      const name = document.getElementById("carName").value;
+      const year = document.getElementById("carYear").value;
+      const price = document.getElementById("carPrice").value;
+
+      if (!name || !year || !price) { alert("Fill all fields!"); return; }
+
+      let cars = JSON.parse(localStorage.getItem("cars")) || [];
+      cars.push({ name, year, price });
+      localStorage.setItem("cars", JSON.stringify(cars));
+
+      document.getElementById("carName").value = "";
+      document.getElementById("carYear").value = "";
+      document.getElementById("carPrice").value = "";
+
+      loadCars();
+    }
+
+    // Load Cars
+    function loadCars() {
+      const carList = document.getElementById("carList");
+      carList.innerHTML = "";
+      const cars = JSON.parse(localStorage.getItem("cars")) || [];
+      cars.forEach((car, index) => {
+        const div = document.createElement("div");
+        div.className = "car-item";
+        div.innerHTML = `<strong>${car.name}</strong> - ${car.year} - ₦${car.price}`;
+        carList.appendChild(div);
+      });
+    }
+  </script>
+</body>
+      </html>
