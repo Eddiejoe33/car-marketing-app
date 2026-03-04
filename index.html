@@ -203,7 +203,23 @@ button{
 </div>
 
 <script>
+let db;
 
+let request = indexedDB.open("CarMarketingDB", 1);
+
+request.onupgradeneeded = function(e){
+  db = e.target.result;
+  db.createObjectStore("cars", { keyPath: "id", autoIncrement: true });
+};
+
+request.onsuccess = function(e){
+  db = e.target.result;
+  loadHistory();
+};
+
+request.onerror = function(){
+  alert("Database failed to open");
+};
 function switchPage(pageId, element){
   document.querySelectorAll('.page').forEach(p=>{
     p.classList.remove('active');
@@ -218,49 +234,61 @@ function switchPage(pageId, element){
   element.classList.add('active');
 }
 
-function saveToHistory(postText){
-  let history = JSON.parse(localStorage.getItem("carHistory")) || [];
+function saveToHistory(postText, imageFile){
+  let transaction = db.transaction(["cars"], "readwrite");
+  let store = transaction.objectStore("cars");
 
   let entry = {
     text: postText,
+    image: imageFile,
     date: new Date().toLocaleString()
   };
 
-  history.unshift(entry);
+  store.add(entry);
 
-  localStorage.setItem("carHistory", JSON.stringify(history));
-
-  loadHistory();
-}
-
-function loadHistory(){
-  let history = JSON.parse(localStorage.getItem("carHistory")) || [];
-  let historyBox = document.querySelector("#history .output");
-
-  if(history.length === 0){
-    historyBox.innerHTML = "No posts yet.";
-    return;
+  transaction.oncomplete = function(){
+    loadHistory();
+  };
   }
-
+function loadHistory(){
+  let historyBox = document.querySelector("#history .output");
   historyBox.innerHTML = "";
 
-  history.forEach(item=>{
-    historyBox.innerHTML += `
-      <div style="margin-bottom:10px; padding:8px; background:#1e293b; border-radius:6px;">
-        <small style="color:#9ca3af;">${item.date}</small><br>
-        ${item.text}
-      </div>
-    `;
-  });
-}
+  let transaction = db.transaction(["cars"], "readonly");
+  let store = transaction.objectStore("cars");
+
+  let request = store.getAll();
+
+  request.onsuccess = function(){
+    let history = request.result;
+
+    if(history.length === 0){
+      historyBox.innerHTML = "No posts yet.";
+      return;
+    }
+
+    history.reverse().forEach(item=>{
+      let imageURL = item.image ? URL.createObjectURL(item.image) : "";
+
+      historyBox.innerHTML += `
+        <div style="margin-bottom:10px; padding:8px; background:#1e293b; border-radius:6px;">
+          <small style="color:#9ca3af;">${item.date}</small><br>
+          ${item.image ? `<img src="${imageURL}" style="width:100%; border-radius:6px; margin-top:6px;">` : ""}
+          <div style="margin-top:6px;">${item.text}</div>
+        </div>
+      `;
+    });
+  };
+  }
 
 window.onload = loadHistory;
-
 function generatePost(){
   let name = document.getElementById("carName").value;
   let year = document.getElementById("year").value;
   let price = document.getElementById("price").value;
   let condition = document.getElementById("condition").value;
+  let fileInput = document.getElementById("mediaInput");
+  let file = fileInput.files[0];
 
   let post = `🚗 ${name} (${year})
 💰 Price: ${price}
@@ -271,8 +299,8 @@ function generatePost(){
 
   document.getElementById("result").innerText = post;
 
-  saveToHistory(post);
-}
+  saveToHistory(post, file);
+  }
 
 async function sharePost() {
   const text = document.getElementById("result").innerText;
