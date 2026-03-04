@@ -5,20 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚗 Car Marketing App</title>
 <style>
-  /* Reset & body */
-  html, body { margin:0; padding:0; font-family: Arial; background:#f4f4f4; height:100%; }
+  /* Reset & body as flex column */
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial;
+    background: #f4f4f4;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
 
-  /* Screen content fills above nav, scrollable internally */
-  .screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 60px; /* space for bottom nav */
+  /* Screen wrapper flex column, scrollable */
+  .screen-wrapper {
+    flex: 1; /* takes all space above bottom nav */
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
-    padding: 10px 10px 5px 10px; /* less bottom padding for compact layout */
+    padding: 10px;
     box-sizing: border-box;
-    display: none;
   }
 
   h2,h3 { margin:10px 0; }
@@ -28,18 +33,13 @@
   /* Card style for history */
   .card { background:white; border-radius:8px; padding:10px; margin:10px 0; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
 
-  /* Bottom nav fixed */
+  /* Bottom nav fixed at bottom */
   .bottom-nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 60px;
-    display: flex;
-    justify-content: space-around;
-    background: #fff;
-    border-top: 1px solid #ccc;
-    z-index: 999;
+    height:60px;
+    display:flex;
+    justify-content:space-around;
+    background:#fff;
+    border-top:1px solid #ccc;
   }
   .bottom-nav button { width:24%; font-size:16px; }
 
@@ -51,7 +51,7 @@
 <body>
 
 <!-- PIN Screen -->
-<div id="pinScreen" class="screen">
+<div id="pinScreen" class="screen-wrapper">
   <h2>🔐 Enter 4-Digit PIN</h2>
   <input type="password" id="pinInput" maxlength="4" placeholder="****">
   <button onclick="checkPin()">Enter</button>
@@ -59,7 +59,7 @@
 </div>
 
 <!-- Dashboard Screen -->
-<div id="dashboardScreen" class="screen">
+<div id="dashboardScreen" class="screen-wrapper" style="display:none;">
   <h2>🏠 Create Car Post</h2>
   <input type="text" id="carName" placeholder="Car Name">
   <input type="text" id="carYear" placeholder="Year">
@@ -67,29 +67,30 @@
   <input type="text" id="carCondition" placeholder="Condition (New / Used)">
   <textarea id="carNotes" placeholder="Notes / Description"></textarea>
   <input type="file" id="carMedia" accept="image/*,video/*" multiple>
-  <button onclick="generatePost()">Generate Post</button>
 
+  <div style="flex-grow:1"></div> <!-- pushes buttons to bottom -->
+
+  <button onclick="generatePost()">Generate Post</button>
   <div id="generatedPost"></div>
   <div class="media-preview" id="mediaPreview"></div>
-  <!-- Only Share Post button to keep bottom nav visible -->
   <button onclick="sharePost()">📤 Share Post</button>
 </div>
 
 <!-- History Screen -->
-<div id="historyScreen" class="screen">
+<div id="historyScreen" class="screen-wrapper" style="display:none;">
   <h2>📚 Post History</h2>
   <div id="historyList"></div>
 </div>
 
 <!-- Settings Screen -->
-<div id="settingsScreen" class="screen">
+<div id="settingsScreen" class="screen-wrapper" style="display:none;">
   <h2>⚙️ Settings</h2>
   <input type="password" id="newPin" maxlength="4" placeholder="Enter New PIN">
   <button onclick="changePin()">Change PIN</button>
 </div>
 
 <!-- Profile Screen -->
-<div id="profileScreen" class="screen">
+<div id="profileScreen" class="screen-wrapper" style="display:none;">
   <h2>👤 Profile</h2>
   <p>Name: <span id="dealerName">Dealer</span></p>
   <p>Phone: <span id="dealerPhone">+234xxxxxxxxx</span></p>
@@ -116,14 +117,20 @@
   }
   function changePin(){
     const newPin=document.getElementById("newPin").value;
-    if(newPin.length===4){ localStorage.setItem("dealerPIN",newPin); alert("PIN changed!"); document.getElementById("newPin").value=""; }
+    if(newPin.length===4){ 
+      localStorage.setItem("dealerPIN",newPin); 
+      alert("PIN changed!"); 
+      document.getElementById("newPin").value=""; 
+    }
     else alert("PIN must be 4 digits!");
   }
 
   // ---------------- Screen Navigation ----------------
   function showScreen(screenId){
-    ['dashboardScreen','historyScreen','settingsScreen','profileScreen','pinScreen'].forEach(s=>document.getElementById(s).style.display='none');
-    document.getElementById(screenId).style.display='block';
+    ['dashboardScreen','historyScreen','settingsScreen','profileScreen','pinScreen'].forEach(s=>{
+      document.getElementById(s).style.display='none';
+    });
+    document.getElementById(screenId).style.display='flex';
   }
 
   // ---------------- Car / Post Logic ----------------
@@ -172,7 +179,7 @@
   }
 
   // ---------------- Initial Load ----------------
-  document.getElementById("pinScreen").style.display="block";
+  document.getElementById("pinScreen").style.display="flex";
 </script>
 
 </body>
