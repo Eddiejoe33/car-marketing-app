@@ -5,47 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚗 Car Marketing App</title>
 <style>
-  /* Reset & body as flex column */
   html, body {
-    margin: 0;
-    padding: 0;
+    margin:0;
+    padding:0;
     font-family: Arial;
-    background: #f4f4f4;
     height: 100%;
-    display: flex;
-    flex-direction: column;
+    background:#f4f4f4;
+    overflow: hidden; /* prevent scroll */
   }
 
-  /* Screen wrapper flex column, scrollable */
+  /* Container taking full screen except bottom nav */
   .screen-wrapper {
-    flex: 1; /* takes all space above bottom nav */
+    height: calc(100% - 60px); /* leave room for bottom nav */
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    padding: 10px;
+    justify-content: flex-start;
+    padding:10px;
     box-sizing: border-box;
   }
 
-  h2,h3 { margin:10px 0; }
+  h2 { margin:8px 0; font-size:20px; }
   input, textarea { width:100%; padding:8px; margin:3px 0; border:1px solid #ccc; border-radius:6px; font-size:16px; }
   button { padding:10px; margin:3px 0; border:none; border-radius:8px; background:#4CAF50; color:white; font-size:16px; width:100%; }
+  #generatedPost { background:#fff; padding:8px; border-radius:8px; margin:5px 0; white-space: pre-line; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+  .media-preview { display:flex; flex-wrap: nowrap; gap:5px; margin:5px 0; overflow-x:auto; }
+  .media-preview img, .media-preview video { max-width:100px; max-height:100px; border-radius:6px; object-fit:cover; }
 
-  /* Card style for history */
-  .card { background:white; border-radius:8px; padding:10px; margin:10px 0; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-
-  /* Bottom nav fixed at bottom */
+  /* Bottom nav fixed */
   .bottom-nav {
     height:60px;
     display:flex;
     justify-content:space-around;
+    align-items:center;
     background:#fff;
     border-top:1px solid #ccc;
   }
   .bottom-nav button { width:24%; font-size:16px; }
-
-  #generatedPost { background:#fff; padding:8px; border-radius:8px; margin:5px 0; white-space: pre-line; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-  .media-preview { display:flex; overflow-x:auto; gap:5px; margin:5px 0; flex-wrap: nowrap; }
-  .media-preview img, .media-preview video { max-width:120px; max-height:120px; border-radius:6px; object-fit:cover; }
 </style>
 </head>
 <body>
@@ -67,8 +62,6 @@
   <input type="text" id="carCondition" placeholder="Condition (New / Used)">
   <textarea id="carNotes" placeholder="Notes / Description"></textarea>
   <input type="file" id="carMedia" accept="image/*,video/*" multiple>
-
-  <div style="flex-grow:1"></div> <!-- pushes buttons to bottom -->
 
   <button onclick="generatePost()">Generate Post</button>
   <div id="generatedPost"></div>
@@ -183,4 +176,4 @@
 </script>
 
 </body>
-  </html>
+    </html>
