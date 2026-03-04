@@ -33,7 +33,7 @@ html,body{
 /* CONTENT */
 .content{
   flex:1;
-  padding:10px;
+  padding:14px;
   display:flex;
   flex-direction:column;
   justify-content:space-between;
@@ -43,68 +43,77 @@ html,body{
 .header{
   text-align:center;
   font-weight:bold;
-  font-size:18px;
-  margin-bottom:8px;
+  font-size:22px; /* Bigger */
+  margin-bottom:12px;
 }
 
 /* FORM */
 input, select{
   width:100%;
-  padding:7px;
-  margin-bottom:6px;
+  padding:10px;
+  margin-bottom:8px;
   border:none;
-  border-radius:6px;
+  border-radius:8px;
   background:#1e293b;
   color:white;
-  font-size:13px;
+  font-size:15px; /* Bigger */
 }
 
 /* FILE */
 .file-box{
   background:#1e293b;
-  padding:6px;
-  border-radius:6px;
-  font-size:12px;
-  margin-bottom:6px;
+  padding:10px;
+  border-radius:8px;
+  font-size:14px; /* Bigger */
+  margin-bottom:8px;
 }
 
 /* BUTTONS */
 button{
   width:100%;
-  padding:7px;
-  margin-bottom:6px;
+  padding:10px;
+  margin-bottom:8px;
   border:none;
-  border-radius:6px;
+  border-radius:8px;
   background:#2563eb;
   color:white;
   font-weight:bold;
-  font-size:13px;
+  font-size:15px; /* Bigger */
 }
 
 /* OUTPUT */
 .output{
   background:#1e293b;
-  padding:6px;
-  border-radius:6px;
-  font-size:12px;
-  height:70px;
+  padding:10px;
+  border-radius:8px;
+  font-size:14px; /* Bigger */
+  height:90px;
   overflow:auto;
 }
 
 /* BOTTOM NAV */
 .bottom-nav{
-  height:55px;
+  height:60px;
   background:#111827;
   display:flex;
   justify-content:space-around;
   align-items:center;
-  font-size:12px;
+  font-size:14px; /* Bigger */
   border-top:1px solid #1f2937;
-  flex-shrink:0;
 }
 
-.bottom-nav div{
+.nav-item{
+  flex:1;
   text-align:center;
+  padding-top:6px;
+  color:#9ca3af;
+  transition:0.3s;
+}
+
+.nav-item.active{
+  color:#2563eb;
+  font-weight:bold;
+  border-top:3px solid #2563eb;
 }
 </style>
 </head>
@@ -130,7 +139,7 @@ button{
 
       <div class="file-box">
         📸 Upload Image / Video
-        <input type="file" id="media" style="margin-top:4px;">
+        <input type="file" id="media" style="margin-top:6px;">
       </div>
 
       <button onclick="generatePost()">✨ Generate Post</button>
@@ -144,10 +153,10 @@ button{
   </div>
 
   <div class="bottom-nav">
-    <div>🏠 Dashboard</div>
-    <div>🕘 History</div>
-    <div>⚙ Settings</div>
-    <div>👤 Profile</div>
+    <div class="nav-item active" onclick="setActive(this)">🏠 Dashboard</div>
+    <div class="nav-item" onclick="setActive(this)">🕘 History</div>
+    <div class="nav-item" onclick="setActive(this)">⚙ Settings</div>
+    <div class="nav-item" onclick="setActive(this)">👤 Profile</div>
   </div>
 
 </div>
@@ -181,7 +190,15 @@ function sharePost(){
     alert("Sharing not supported on this device.");
   }
 }
+
+/* Active Nav Indicator */
+function setActive(element){
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.classList.remove('active');
+  });
+  element.classList.add('active');
+}
 </script>
 
 </body>
-  </html>
+</html>
