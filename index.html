@@ -214,19 +214,25 @@ function generatePost(){
 
   document.getElementById("result").innerText = post;
 }
+async function sharePost() {
+  const text = document.getElementById("result").innerText;
+  const fileInput = document.querySelector("input[type='file']");
+  const files = fileInput.files;
 
-function sharePost(){
-  let text = document.getElementById("result").innerText;
-
-  if(navigator.share){
-    navigator.share({
-      title: "Car Advert",
-      text: text
-    });
+  if (navigator.canShare && navigator.canShare({ files })) {
+    try {
+      await navigator.share({
+        title: "Car Advert",
+        text: text,
+        files: files
+      });
+    } catch (error) {
+      alert("Sharing failed.");
+    }
   } else {
-    alert("Sharing not supported.");
+    alert("Your browser does not support image sharing.");
   }
-}
+  }
 
 </script>
 
