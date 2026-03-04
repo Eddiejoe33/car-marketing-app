@@ -1,95 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Car Marketing App</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    #pinScreen, #dashboard { display: none; }
-    input { padding: 8px; margin: 5px 0; width: 100%; }
-    button { padding: 10px; margin-top: 10px; width: 100%; }
-    .car-item { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚗 Car Marketing App</title>
+<style>
+  body { margin:0; font-family: Arial; background:#f4f4f4; color:#333; }
+  h2,h3 { margin:10px 0; }
+  button { padding:12px; margin:5px 0; border:none; border-radius:8px; background:#4CAF50; color:white; font-size:16px; width:100%; }
+  input, textarea { width:100%; padding:10px; margin:5px 0; border:1px solid #ccc; border-radius:6px; font-size:16px; }
+  .screen { display:none; padding:15px; }
+  .card { background:white; border-radius:8px; padding:10px; margin:10px 0; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+  .bottom-nav { position:fixed; bottom:0; width:100%; display:flex; justify-content:space-around; background:#fff; border-top:1px solid #ccc; padding:10px 0; }
+  .bottom-nav button { width:25%; font-size:18px; }
+  .emoji { margin-right:5px; }
+  #generatedPost { background:#fff; padding:10px; border-radius:8px; margin:10px 0; white-space:pre-line; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+</style>
 </head>
 <body>
-  <!-- PIN Screen -->
-  <div id="pinScreen">
-    <h2>Enter 4-Digit PIN</h2>
-    <input type="password" id="pinInput" maxlength="4" placeholder="****">
-    <button onclick="checkPin()">Enter</button>
-    <p id="pinMessage" style="color:red;"></p>
-  </div>
 
-  <!-- Dashboard -->
-  <div id="dashboard">
-    <h2>Car Marketing Dashboard</h2>
-    <button onclick="showAddCar()">Add New Car</button>
-    <div id="addCarForm" style="display:none;">
-      <input type="text" id="carName" placeholder="Car Name">
-      <input type="text" id="carYear" placeholder="Year">
-      <input type="text" id="carPrice" placeholder="Price">
-      <button onclick="addCar()">Save Car</button>
-    </div>
-    <h3>Active Cars</h3>
-    <div id="carList"></div>
-  </div>
+<!-- PIN Screen -->
+<div id="pinScreen" class="screen">
+  <h2>🔐 Enter 4-Digit PIN</h2>
+  <input type="password" id="pinInput" maxlength="4" placeholder="****">
+  <button onclick="checkPin()">Enter</button>
+  <p id="pinMessage" style="color:red;"></p>
+</div>
 
-  <script>
-    // PIN Logic
-    if (!localStorage.getItem("dealerPIN")) {
-      // First time setup: default PIN
-      localStorage.setItem("dealerPIN", "1234");
+<!-- Dashboard / Create Post Screen -->
+<div id="dashboardScreen" class="screen">
+  <h2>🏠 Create Car Post</h2>
+  <input type="text" id="carName" placeholder="Car Name">
+  <input type="text" id="carYear" placeholder="Year">
+  <input type="text" id="carPrice" placeholder="Price">
+  <input type="text" id="carCondition" placeholder="Condition (New / Used)">
+  <textarea id="carNotes" placeholder="Notes / Description"></textarea>
+  <button onclick="generatePost()">Generate Post</button>
+  
+  <div id="generatedPost"></div>
+  <button onclick="copyPost()">📋 Copy Post</button>
+  <button onclick="sharePost()">📤 Share Post</button>
+</div>
+
+<!-- History Screen -->
+<div id="historyScreen" class="screen">
+  <h2>📚 Post History</h2>
+  <div id="historyList"></div>
+</div>
+
+<!-- Settings Screen -->
+<div id="settingsScreen" class="screen">
+  <h2>⚙️ Settings</h2>
+  <input type="password" id="newPin" maxlength="4" placeholder="Enter New PIN">
+  <button onclick="changePin()">Change PIN</button>
+</div>
+
+<!-- Profile Screen -->
+<div id="profileScreen" class="screen">
+  <h2>👤 Profile</h2>
+  <p>Name: <span id="dealerName">Dealer</span></p>
+  <p>Phone: <span id="dealerPhone">+234xxxxxxxxx</span></p>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <button onclick="showScreen('dashboardScreen')">🏠 Dashboard</button>
+  <button onclick="showScreen('historyScreen')">📚 History</button>
+  <button onclick="showScreen('settingsScreen')">⚙️ Settings</button>
+  <button onclick="showScreen('profileScreen')">👤 Profile</button>
+</div>
+
+<script>
+  // ---------------- PIN Logic ----------------
+  if(!localStorage.getItem("dealerPIN")){
+    localStorage.setItem("dealerPIN","1234"); // default PIN
+  }
+
+  function checkPin(){
+    const pin = document.getElementById("pinInput").value;
+    if(pin === localStorage.getItem("dealerPIN")){
+      document.getElementById("pinScreen").style.display="none";
+      showScreen('dashboardScreen');
+      loadHistory();
+    } else {
+      document.getElementById("pinMessage").innerText="Incorrect PIN!";
     }
-    document.getElementById("pinScreen").style.display = "block";
+  }
 
-    function checkPin() {
-      const pin = document.getElementById("pinInput").value;
-      if (pin === localStorage.getItem("dealerPIN")) {
-        document.getElementById("pinScreen").style.display = "none";
-        document.getElementById("dashboard").style.display = "block";
-        loadCars();
-      } else {
-        document.getElementById("pinMessage").innerText = "Incorrect PIN!";
-      }
+  function changePin(){
+    const newPin = document.getElementById("newPin").value;
+    if(newPin.length===4){
+      localStorage.setItem("dealerPIN",newPin);
+      alert("PIN changed successfully!");
+      document.getElementById("newPin").value="";
+    } else { alert("PIN must be 4 digits!"); }
+  }
+
+  // ---------------- Screen Navigation ----------------
+  function showScreen(screenId){
+    const screens=['dashboardScreen','historyScreen','settingsScreen','profileScreen','pinScreen'];
+    screens.forEach(s=>document.getElementById(s).style.display='none');
+    document.getElementById(screenId).style.display='block';
+  }
+
+  // ---------------- Car / Post Logic ----------------
+  function generatePost(){
+    const name = document.getElementById("carName").value;
+    const year = document.getElementById("carYear").value;
+    const price = document.getElementById("carPrice").value;
+    const condition = document.getElementById("carCondition").value;
+    const notes = document.getElementById("carNotes").value;
+
+    if(!name || !year || !price){
+      alert("Please fill Name, Year, Price!");
+      return;
     }
 
-    // Show Add Car Form
-    function showAddCar() {
-      const form = document.getElementById("addCarForm");
-      form.style.display = form.style.display === "none" ? "block" : "none";
-    }
+    const post=`🚗 *${name}*\n📅 Year: ${year}\n💰 Price: ₦${price}\n🔧 Condition: ${condition}\n✨ Notes: ${notes || '-'}\n📱 Contact me for details!`;
 
-    // Add Car
-    function addCar() {
-      const name = document.getElementById("carName").value;
-      const year = document.getElementById("carYear").value;
-      const price = document.getElementById("carPrice").value;
+    document.getElementById("generatedPost").innerText=post;
 
-      if (!name || !year || !price) { alert("Fill all fields!"); return; }
+    // Save to history
+    let history = JSON.parse(localStorage.getItem("postHistory")) || [];
+    history.push({name,year,price,condition,notes,post});
+    localStorage.setItem("postHistory", JSON.stringify(history));
+    loadHistory();
+  }
 
-      let cars = JSON.parse(localStorage.getItem("cars")) || [];
-      cars.push({ name, year, price });
-      localStorage.setItem("cars", JSON.stringify(cars));
+  function copyPost(){
+    const text = document.getElementById("generatedPost").innerText;
+    navigator.clipboard.writeText(text).then(()=>alert("Post copied to clipboard!"));
+  }
 
-      document.getElementById("carName").value = "";
-      document.getElementById("carYear").value = "";
-      document.getElementById("carPrice").value = "";
+  function sharePost(){
+    const text = document.getElementById("generatedPost").innerText;
+    if(navigator.share){
+      navigator.share({text});
+    } else { alert("Sharing not supported on this browser."); }
+  }
 
-      loadCars();
-    }
+  function loadHistory(){
+    const historyList = document.getElementById("historyList");
+    historyList.innerHTML="";
+    let history = JSON.parse(localStorage.getItem("postHistory")) || [];
+    history.forEach((item,index)=>{
+      const div = document.createElement("div");
+      div.className="card";
+      div.innerHTML=`🚗 <strong>${item.name}</strong><br>Year: ${item.year} | Price: ₦${item.price} | Condition: ${item.condition}<br>Notes: ${item.notes || '-'}<br><pre>${item.post}</pre>`;
+      historyList.appendChild(div);
+    });
+  }
 
-    // Load Cars
-    function loadCars() {
-      const carList = document.getElementById("carList");
-      carList.innerHTML = "";
-      const cars = JSON.parse(localStorage.getItem("cars")) || [];
-      cars.forEach((car, index) => {
-        const div = document.createElement("div");
-        div.className = "car-item";
-        div.innerHTML = `<strong>${car.name}</strong> - ${car.year} - ₦${car.price}`;
-        carList.appendChild(div);
-      });
-    }
-  </script>
+  // ---------------- Initial Load ----------------
+  document.getElementById("pinScreen").style.display="block";
+</script>
+
 </body>
-      </html>
+</html>
