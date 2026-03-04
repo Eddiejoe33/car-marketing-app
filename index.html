@@ -12,19 +12,28 @@
   font-family: Arial, sans-serif;
 }
 
-body{
-  height:100vh;
-  display:flex;
-  flex-direction:column;
+html,body{
+  height:100%;
+  overflow:hidden;
   background:#0f172a;
   color:white;
-  overflow:hidden; /* THIS STOPS SCROLL */
 }
 
-/* MAIN CONTENT */
-.main{
+/* APP WRAPPER */
+.app{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  display:flex;
+  flex-direction:column;
+}
+
+/* CONTENT */
+.content{
   flex:1;
-  padding:12px;
+  padding:10px;
   display:flex;
   flex-direction:column;
   justify-content:space-between;
@@ -33,16 +42,15 @@ body{
 /* HEADER */
 .header{
   text-align:center;
-  font-size:18px;
   font-weight:bold;
+  font-size:18px;
   margin-bottom:8px;
 }
 
 /* FORM */
-.form input,
-.form select{
+input, select{
   width:100%;
-  padding:8px;
+  padding:7px;
   margin-bottom:6px;
   border:none;
   border-radius:6px;
@@ -51,7 +59,7 @@ body{
   font-size:13px;
 }
 
-/* FILE UPLOAD */
+/* FILE */
 .file-box{
   background:#1e293b;
   padding:6px;
@@ -63,7 +71,7 @@ body{
 /* BUTTONS */
 button{
   width:100%;
-  padding:8px;
+  padding:7px;
   margin-bottom:6px;
   border:none;
   border-radius:6px;
@@ -73,17 +81,13 @@ button{
   font-size:13px;
 }
 
-button:active{
-  transform:scale(0.97);
-}
-
 /* OUTPUT */
 .output{
   background:#1e293b;
   padding:6px;
   border-radius:6px;
   font-size:12px;
-  min-height:60px;
+  height:70px;
   overflow:auto;
 }
 
@@ -96,6 +100,7 @@ button:active{
   align-items:center;
   font-size:12px;
   border-top:1px solid #1f2937;
+  flex-shrink:0;
 }
 
 .bottom-nav div{
@@ -106,12 +111,13 @@ button:active{
 
 <body>
 
-<div class="main">
+<div class="app">
 
-  <div>
-    <div class="header">🚗 Create Car Advert</div>
+  <div class="content">
 
-    <div class="form">
+    <div>
+      <div class="header">🚗 Create Car Advert</div>
+
       <input type="text" id="carName" placeholder="Car Name">
       <input type="text" id="year" placeholder="Year">
       <input type="text" id="price" placeholder="Price">
@@ -121,28 +127,29 @@ button:active{
         <option>Foreign Used</option>
         <option>Nigerian Used</option>
       </select>
+
+      <div class="file-box">
+        📸 Upload Image / Video
+        <input type="file" id="media" style="margin-top:4px;">
+      </div>
+
+      <button onclick="generatePost()">✨ Generate Post</button>
+      <button onclick="sharePost()">📤 Share Post</button>
     </div>
 
-    <div class="file-box">
-      📸 Upload Image / Video
-      <input type="file" id="media" style="margin-top:4px;">
+    <div class="output" id="result">
+      Your generated advert will appear here...
     </div>
 
-    <button onclick="generatePost()">✨ Generate Post</button>
-    <button onclick="sharePost()">📤 Share Post</button>
   </div>
 
-  <div class="output" id="result">
-    Your generated advert will appear here...
+  <div class="bottom-nav">
+    <div>🏠 Dashboard</div>
+    <div>🕘 History</div>
+    <div>⚙ Settings</div>
+    <div>👤 Profile</div>
   </div>
 
-</div>
-
-<div class="bottom-nav">
-  <div>🏠 Dashboard</div>
-  <div>🕘 History</div>
-  <div>⚙ Settings</div>
-  <div>👤 Profile</div>
 </div>
 
 <script>
@@ -177,4 +184,4 @@ function sharePost(){
 </script>
 
 </body>
-</html>
+  </html>
