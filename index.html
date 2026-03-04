@@ -14,9 +14,9 @@
     top: 0;
     left: 0;
     right: 0;
-    bottom: 60px; /* leave space for bottom nav */
+    bottom: 60px; /* space for bottom nav */
     overflow-y: auto;
-    padding: 10px;
+    padding: 10px 10px 5px 10px; /* less bottom padding for compact layout */
     box-sizing: border-box;
     display: none;
   }
@@ -24,8 +24,8 @@
   h2,h3 { margin:10px 0; }
   input, textarea { width:100%; padding:8px; margin:3px 0; border:1px solid #ccc; border-radius:6px; font-size:16px; }
   button { padding:10px; margin:3px 0; border:none; border-radius:8px; background:#4CAF50; color:white; font-size:16px; width:100%; }
-  
-  /* Card style */
+
+  /* Card style for history */
   .card { background:white; border-radius:8px; padding:10px; margin:10px 0; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
 
   /* Bottom nav fixed */
@@ -71,9 +71,9 @@
 
   <div id="generatedPost"></div>
   <div class="media-preview" id="mediaPreview"></div>
-  <!-- Removed Copy Post button to save space -->
+  <!-- Only Share Post button to keep bottom nav visible -->
   <button onclick="sharePost()">📤 Share Post</button>
-    </div>
+</div>
 
 <!-- History Screen -->
 <div id="historyScreen" class="screen">
@@ -155,8 +155,11 @@
     loadHistory();
   }
 
-  function copyPost(){ navigator.clipboard.writeText(document.getElementById("generatedPost").innerText).then(()=>alert("Post copied!")); }
-  function sharePost(){ const text=document.getElementById("generatedPost").innerText; if(navigator.share) navigator.share({text}); else alert("Sharing not supported."); }
+  function sharePost(){ 
+    const text=document.getElementById("generatedPost").innerText; 
+    if(navigator.share) navigator.share({text}); 
+    else alert("Sharing not supported."); 
+  }
 
   function loadHistory(){
     const list=document.getElementById("historyList"); list.innerHTML="";
@@ -173,4 +176,4 @@
 </script>
 
 </body>
-  </html>
+                          </html>
