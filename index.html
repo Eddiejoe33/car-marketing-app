@@ -44,6 +44,7 @@ html,body{
 
 .page.active{
   display:flex;
+  flex-direction:column;
 }
 
 /* HEADER */
@@ -85,6 +86,7 @@ button{
   color:white;
   font-weight:bold;
   font-size:15px;
+  cursor:pointer;
 }
 
 /* OUTPUT */
@@ -172,19 +174,16 @@ button{
 
     <!-- SETTINGS -->
    <div class="page" id="settings">
-  <div class="header">⚙ Settings</div>
-
-  <input type="text" id="dealerName" placeholder="Change Dealer Name">
-  <input type="password" id="dealerPin" placeholder="Change PIN">
-
-  <button onclick="saveSettings()">Save Settings</button>
+     <div class="header">⚙ Settings</div>
+     <input type="text" id="dealerName" placeholder="Change Dealer Name">
+     <input type="password" id="dealerPin" placeholder="Change PIN">
+     <button onclick="saveSettings()">Save Settings</button>
    </div>
 
     <!-- PROFILE -->
     <div class="page" id="profile">
-  <div class="header">👤 Profile</div>
-  <div class="output" id="profileInfo"></div>
-    </div>
+      <div class="header">👤 Profile</div>
+      <div class="output" id="profileInfo"></div>
     </div>
 
   </div>
@@ -238,7 +237,7 @@ function switchPage(pageId, element){
 }
 
 /* =========================
-   SAVE SETTINGS
+   SAVE SETTINGS (REAL)
 ========================= */
 function saveSettings(){
   let name = document.getElementById("dealerName").value;
@@ -270,15 +269,31 @@ function loadProfile(){
 }
 
 /* =========================
-   SAVE CAR TO INDEXEDDB (MULTIPLE IMAGES)
+   RANDOM CAPTIONS
+========================= */
+const captions = [
+  "🔥 Clean and affordable ride!",
+  "💎 Premium condition, ready to drive!",
+  "🚘 Smooth engine, zero worries!",
+  "⚡ Fast deal — serious buyers only!",
+  "💰 Best price in the market!",
+  "📍 Available for inspection today!",
+  "🔑 Drive home today!",
+  "🚗 Very neat and fuel efficient!"
+];
+
+/* =========================
+   SAVE CAR TO INDEXEDDB
 ========================= */
 function saveToHistory(postText, imageFiles){
   let transaction = db.transaction(["cars"], "readwrite");
   let store = transaction.objectStore("cars");
 
+  let filesArray = Array.from(imageFiles || []);
+
   let entry = {
     text: postText,
-    images: Array.from(imageFiles), // save all selected files
+    images: filesArray,
     date: new Date().toLocaleString()
   };
 
@@ -290,10 +305,11 @@ function saveToHistory(postText, imageFiles){
 }
 
 /* =========================
-   LOAD HISTORY (MULTIPLE IMAGES)
+   LOAD HISTORY
 ========================= */
 function loadHistory(){
   if(!db) return;
+
   let historyBox = document.querySelector("#history .output");
   if(!historyBox) return;
 
@@ -314,9 +330,9 @@ function loadHistory(){
 
     history.reverse().forEach(item=>{
       let imagesHTML = "";
-      if(item.images && item.images.length){
-        item.images.forEach(file=>{
-          let url = URL.createObjectURL(file);
+      if(item.images && item.images.length > 0){
+        item.images.forEach(imgFile => {
+          let url = URL.createObjectURL(imgFile);
           imagesHTML += `<img src="${url}" style="width:100%; border-radius:6px; margin-top:6px;">`;
         });
       }
@@ -342,27 +358,12 @@ function loadHistory(){
 function deleteCar(id){
   let transaction = db.transaction(["cars"], "readwrite");
   let store = transaction.objectStore("cars");
-
   store.delete(id);
 
   transaction.oncomplete = function(){
     loadHistory();
   };
 }
-
-/* =========================
-   RANDOM CAPTIONS
-========================= */
-const captions = [
-  "🔥 Clean and affordable ride!",
-  "💎 Premium condition, ready to drive!",
-  "🚘 Smooth engine, zero worries!",
-  "⚡ Fast deal — serious buyers only!",
-  "💰 Best price in the market!",
-  "📍 Available for inspection today!",
-  "🔑 Drive home today!",
-  "🚗 Very neat and fuel efficient!"
-];
 
 /* =========================
    GENERATE POST
@@ -389,7 +390,6 @@ ${randomCaption}
 📲 DM now to secure this deal!`;
 
   document.getElementById("result").innerText = post;
-
   saveToHistory(post, files);
 }
 
@@ -414,4 +414,4 @@ async function sharePost() {
 </script>
 
 </body>
-        </html>
+       </html>
