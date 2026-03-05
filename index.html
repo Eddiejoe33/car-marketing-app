@@ -201,16 +201,26 @@ async function sharePost(){
 function getStaff(){return JSON.parse(localStorage.getItem("staffMembers"))||[];}
 function saveStaff(list){localStorage.setItem("staffMembers",JSON.stringify(list));}
 function addStaff(){
-  let name=document.getElementById("staffName").value.trim();
-  let role=document.getElementById("staffRole").value.trim();
-  if(!name||!role){alert("Enter staff name and role");return;}
-  let staff=getStaff();
-  staff.push({name,role});
+  let name = document.getElementById("staffName").value.trim();
+  let role = document.getElementById("staffRole").value.trim();
+  let staffBox = document.getElementById("staffList"); // output box
+
+  // Remove popup, show message inside staff list
+  if(!name || !role){
+    staffBox.innerHTML = "⚠ Enter staff name and role!";
+    return;
+  }
+
+  let staff = getStaff();
+  staff.push({ name, role });
   saveStaff(staff);
-  document.getElementById("staffName").value="";
-  document.getElementById("staffRole").value="";
+
+  // Clear input fields
+  document.getElementById("staffName").value = "";
+  document.getElementById("staffRole").value = "";
+
   loadStaff();
-}
+  }
 function loadStaff(){
   let staffBox=document.getElementById("staffList");
   let staff=getStaff();
