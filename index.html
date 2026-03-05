@@ -44,7 +44,6 @@ html,body{
 
 .page.active{
   display:flex;
-  flex-direction:column;
 }
 
 /* HEADER */
@@ -86,7 +85,6 @@ button{
   color:white;
   font-weight:bold;
   font-size:15px;
-  cursor:pointer;
 }
 
 /* OUTPUT */
@@ -174,16 +172,19 @@ button{
 
     <!-- SETTINGS -->
    <div class="page" id="settings">
-     <div class="header">⚙ Settings</div>
-     <input type="text" id="dealerName" placeholder="Change Dealer Name">
-     <input type="password" id="dealerPin" placeholder="Change PIN">
-     <button onclick="saveSettings()">Save Settings</button>
+  <div class="header">⚙ Settings</div>
+
+  <input type="text" id="dealerName" placeholder="Change Dealer Name">
+  <input type="password" id="dealerPin" placeholder="Change PIN">
+
+  <button onclick="saveSettings()">Save Settings</button>
    </div>
 
     <!-- PROFILE -->
     <div class="page" id="profile">
-      <div class="header">👤 Profile</div>
-      <div class="output" id="profileInfo"></div>
+  <div class="header">👤 Profile</div>
+  <div class="output" id="profileInfo"></div>
+    </div>
     </div>
 
   </div>
@@ -214,12 +215,13 @@ request.onupgradeneeded = function(e){
 request.onsuccess = function(e){
   db = e.target.result;
   loadHistory();
-  loadProfile();
+  loadProfile(); // Load dealer info
 };
 
 request.onerror = function(){
   alert("Database failed to open");
 };
+
 
 /* =========================
    PAGE SWITCHING
@@ -228,13 +230,16 @@ function switchPage(pageId, element){
   document.querySelectorAll('.page').forEach(p=>{
     p.classList.remove('active');
   });
+
   document.getElementById(pageId).classList.add('active');
 
   document.querySelectorAll('.nav-item').forEach(n=>{
     n.classList.remove('active');
   });
+
   element.classList.add('active');
 }
+
 
 /* =========================
    SAVE SETTINGS (REAL)
@@ -252,6 +257,7 @@ function saveSettings(){
   localStorage.setItem("dealerPin", pin);
 
   alert("Settings saved successfully!");
+
   loadProfile();
 }
 
@@ -268,32 +274,17 @@ function loadProfile(){
   }
 }
 
-/* =========================
-   RANDOM CAPTIONS
-========================= */
-const captions = [
-  "🔥 Clean and affordable ride!",
-  "💎 Premium condition, ready to drive!",
-  "🚘 Smooth engine, zero worries!",
-  "⚡ Fast deal — serious buyers only!",
-  "💰 Best price in the market!",
-  "📍 Available for inspection today!",
-  "🔑 Drive home today!",
-  "🚗 Very neat and fuel efficient!"
-];
 
 /* =========================
    SAVE CAR TO INDEXEDDB
 ========================= */
-function saveToHistory(postText, imageFiles){
+function saveToHistory(postText, imageFile){
   let transaction = db.transaction(["cars"], "readwrite");
   let store = transaction.objectStore("cars");
 
-  let filesArray = Array.from(imageFiles || []);
-
   let entry = {
     text: postText,
-    images: filesArray,
+    image: imageFile,
     date: new Date().toLocaleString()
   };
 
@@ -329,13 +320,7 @@ function loadHistory(){
     }
 
     history.reverse().forEach(item=>{
-      let imagesHTML = "";
-      if(item.images && item.images.length > 0){
-        item.images.forEach(imgFile => {
-          let url = URL.createObjectURL(imgFile);
-          imagesHTML += `<img src="${url}" style="width:100%; border-radius:6px; margin-top:6px;">`;
-        });
-      }
+      let imageURL = item.image ? URL.createObjectURL(item.image) : "";
 
       historyBox.innerHTML += `
         <div style="margin-bottom:10px; padding:8px; background:#1e293b; border-radius:6px;">
@@ -344,7 +329,9 @@ function loadHistory(){
             style="float:right; background:red; padding:4px 8px; border:none; border-radius:4px;">
             Delete
           </button><br>
-          ${imagesHTML}
+
+          ${item.image ? `<img src="${imageURL}" style="width:100%; border-radius:6px; margin-top:6px;">` : ""}
+          
           <div style="margin-top:6px;">${item.text}</div>
         </div>
       `;
@@ -358,13 +345,26 @@ function loadHistory(){
 function deleteCar(id){
   let transaction = db.transaction(["cars"], "readwrite");
   let store = transaction.objectStore("cars");
+
   store.delete(id);
 
   transaction.oncomplete = function(){
     loadHistory();
   };
-}
-
+  }
+/* =========================
+   RANDOM CAPTIONS
+========================= */
+const captions = [
+  "🔥 Clean and affordable ride!",
+  "💎 Premium condition, ready to drive!",
+  "🚘 Smooth engine, zero worries!",
+  "⚡ Fast deal — serious buyers only!",
+  "💰 Best price in the market!",
+  "📍 Available for inspection today!",
+  "🔑 Drive home today!",
+  "🚗 Very neat and fuel efficient!"
+];
 /* =========================
    GENERATE POST
 ========================= */
@@ -376,7 +376,7 @@ function generatePost(){
   let price = document.getElementById("price").value;
   let condition = document.getElementById("condition").value;
   let fileInput = document.getElementById("mediaInput");
-  let files = fileInput.files;
+  let file = fileInput.files[0];
 
   let randomCaption = captions[Math.floor(Math.random() * captions.length)];
 
@@ -390,8 +390,10 @@ ${randomCaption}
 📲 DM now to secure this deal!`;
 
   document.getElementById("result").innerText = post;
-  saveToHistory(post, files);
-}
+
+  saveToHistory(post, file);
+  }
+
 
 /* =========================
    SHARE POST
@@ -411,7 +413,9 @@ async function sharePost() {
     alert("Sharing not supported on this browser.");
   }
 }
+
 </script>
 
 </body>
-       </html>
+        </html>
+
