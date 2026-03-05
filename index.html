@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚗 Dealer Car Marketing App</title>
@@ -20,77 +19,50 @@ button{width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;
 .featured{border:2px solid gold;}
 </style>
 </head>
-<body>
-
-<!-- DASHBOARD -->
-<div class="page active" id="dashboard">
-  <div class="header">🚗 Dealer Car App</div>
-
-  <input type="text" id="carName" placeholder="Car Name">
+<body><!-- DASHBOARD --><div class="page active" id="dashboard">
+  <div class="header">🚗 Dealer Car App</div>  <input type="text" id="carName" placeholder="Car Name">
   <input type="text" id="year" placeholder="Year">
   <input type="text" id="price" placeholder="Price">
   <input type="text" id="dealerPhone" placeholder="Dealer WhatsApp Number (234XXXXXXXXXX)">
-
-  <select id="condition">
+  <input type="text" id="mileage" placeholder="Mileage (e.g 50,000 km)">
+  <input type="text" id="color" placeholder="Color">
+  <input type="text" id="location" placeholder="Location">  <select id="condition">
     <option>Condition</option>
     <option>Brand New</option>
     <option>Foreign Used</option>
     <option>Nigerian Used</option>
-  </select>
-
-  <div class="file-box">
+  </select>  <div class="file-box">
     📸 Upload Images
     <input type="file" id="mediaInput" multiple accept="image/*">
-  </div>
-
-  <button onclick="generatePost()">✨ Generate Post</button>
-  <button onclick="sharePost()">📤 Share Post</button>
+  </div><button onclick="generatePost()">✨ Generate Post</button> <button id="shareBtn" onclick="sharePost()">📤 Share Post</button> <button onclick="copyWhatsApp()">📋 Copy WhatsApp Link</button>
 
   <div class="output" id="result">Your generated advert will appear here...</div>
-</div>
-
-<!-- HISTORY -->
-<div class="page" id="history">
+</div><!-- HISTORY --><div class="page" id="history">
   <div class="header">🕘 History & Featured</div>
   <div class="output" id="historyList"></div>
-</div>
-
-<!-- SETTINGS -->
-<div class="page" id="settings">
+</div><!-- SETTINGS --><div class="page" id="settings">
   <div class="header">⚙ Settings</div>
   <input type="text" id="dealerName" placeholder="Dealer Name">
   <input type="text" id="dealerPhoneSetting" placeholder="Dealer WhatsApp Number (234XXXXXXXXXX)">
   <input type="password" id="dealerPin" placeholder="Change PIN">
   <button onclick="saveSettings()">Save Settings</button>
-</div>
-
-<!-- PROFILE -->
-<div class="page" id="profile">
+</div><!-- PROFILE --><div class="page" id="profile">
   <div class="header">👤 Company Profile</div>
-  <div class="output" id="profileInfo"></div>
-
-  <div style="margin-top:20px;">
+  <div class="output" id="profileInfo"></div>  <div style="margin-top:20px;">
     <h3>➕ Add Staff Member</h3>
     <input type="text" id="staffName" placeholder="Staff Name">
     <input type="text" id="staffRole" placeholder="Staff Role (e.g Sales Manager)">
     <button onclick="addStaff()">Add Staff</button>
-  </div>
-
-  <div style="margin-top:20px;">
+  </div>  <div style="margin-top:20px;">
     <h3>👥 Staff Members</h3>
     <div class="output" id="staffList"></div>
   </div>
-</div>
-
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
+</div><!-- BOTTOM NAV --><div class="bottom-nav">
   <div class="nav-item active" onclick="switchPage('dashboard', this)">🏠<span>Dashboard</span></div>
   <div class="nav-item" onclick="switchPage('history', this)">🕘<span>History</span></div>
   <div class="nav-item" onclick="switchPage('settings', this)">⚙<span>Settings</span></div>
   <div class="nav-item" onclick="switchPage('profile', this)">👤<span>Profile</span></div>
-</div>
-
-<script>
+</div><script>
 // ==================== DATABASE ====================
 let db;
 let request = indexedDB.open("CarMarketingDB", 1);
@@ -140,10 +112,7 @@ function loadHistory(){
     if(cursor){
       let item=cursor.value;
       let imagesHTML="";
-      if(item.images) Array.from(item.images).forEach(f=>{
-        let url=URL.createObjectURL(f);
-        imagesHTML+=`<img src="${url}" style="width:100%;border-radius:8px;margin-top:5px;">`;
-      });
+      if(item.images) Array.from(item.images).forEach(f=>{ let url=URL.createObjectURL(f); imagesHTML+=`<img src="${url}" style="width:100%;border-radius:8px;margin-top:5px;">`; });
       box.innerHTML+=`
       <div style="margin-bottom:15px;padding:12px;background:#1e293b;border-radius:10px;${item.featured?'border:2px solid gold;':''}">
         <small style="color:#9ca3af;">${item.date}</small>
@@ -176,13 +145,7 @@ function toggleFeatured(id){
 }
 
 // ==================== CAPTIONS & POST ====================
-const captions=[
-  "🔥 Clean and affordable ride!",
-  "💎 Premium condition, ready to drive!",
-  "🚘 Smooth engine, zero worries!",
-  "⚡ Fast deal — serious buyers only!",
-  "💰 Best price in the market!"
-];
+const captions=["🔥 Clean and affordable ride!","💎 Premium condition, ready to drive!","🚘 Smooth engine, zero worries!","⚡ Fast deal — serious buyers only!","💰 Best price in the market!"];
 
 function generatePost(){
   let dealerName=localStorage.getItem("dealerName")||"Eddie Motors";
@@ -191,15 +154,15 @@ function generatePost(){
   let year=document.getElementById("year").value;
   let price=document.getElementById("price").value;
   let condition=document.getElementById("condition").value;
+  let mileage=document.getElementById("mileage").value;
+  let color=document.getElementById("color").value;
+  let location=document.getElementById("location").value;
   let media=document.getElementById("mediaInput").files;
   let result=document.getElementById("result");
   let caption=captions[Math.floor(Math.random()*captions.length)];
-  let post=`🚗 ${name} (${year})
-💰 Price: ${price}
-📌 Condition: ${condition}
-🏢 Dealer: ${dealerName}
-📲 WhatsApp: https://wa.me/${dealerPhone}
-${caption}`;
+
+  let post=`🚗 ${name} (${year})\n💰 Price: ${price}\n📌 Condition: ${condition}\n🏢 Dealer: ${dealerName}\n📍 Mileage: ${mileage}\n🎨 Color: ${color}\n📌 Location: ${location}\n📲 WhatsApp: https://wa.me/${dealerPhone}\n${caption}`;
+
   result.innerText=post;
   saveToHistory(post, media);
 }
@@ -213,10 +176,18 @@ async function sharePost(){
       await navigator.share({title:"Car Advert",text:text,files:files});
     }else{
       await navigator.clipboard.writeText(text);
+      alert('Caption copied to clipboard!');
     }
   }catch(e){
     await navigator.clipboard.writeText(text);
+    alert('Caption copied to clipboard!');
   }
+}
+
+function copyWhatsApp(){
+  let phone=localStorage.getItem('dealerPhone')||'';
+  navigator.clipboard.writeText(`https://wa.me/${phone}`);
+  alert('WhatsApp link copied!');
 }
 
 // ==================== STAFF ====================
@@ -239,14 +210,9 @@ function loadStaff(){
   box.innerHTML="";
   if(staff.length===0){box.innerHTML="No staff added yet.";return;}
   staff.forEach((s,i)=>{
-    box.innerHTML+=`<div style="margin-bottom:10px;padding:10px;background:#1e293b;border-radius:8px;">
-    <strong>${s.name}</strong><br>
-    <small>${s.role}</small><br>
-    <button onclick="deleteStaff(${i})" style="background:#dc2626;margin-top:6px;padding:5px;border:none;border-radius:6px;color:white;">Delete</button>
-    </div>`;
+    box.innerHTML+=`<div style="margin-bottom:10px;padding:10px;background:#1e293b;border-radius:8px;"><strong>${s.name}</strong><br><small>${s.role}</small><br><button onclick="deleteStaff(${i})" style="background:#dc2626;margin-top:6px;padding:5px;border:none;border-radius:6px;color:white;">Delete</button></div>`;
   });
 }
 function deleteStaff(i){let s=getStaff();s.splice(i,1);saveStaff(s);loadStaff();}
-</script>
-</body>
+</script></body>
     </html>
