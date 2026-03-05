@@ -3,6 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚗 Car Marketing App</title>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
 html,body{height:100%;background:#0f172a;color:white;}
@@ -16,6 +17,7 @@ button{width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:#111827;display:flex;justify-content:space-around;align-items:center;border-top:1px solid #1f2937;}
 .nav-item{flex:1;text-align:center;color:#9ca3af;font-size:14px;padding-top:6px;transition:0.3s;}
 .nav-item.active{color:#2563eb;font-weight:bold;border-top:3px solid #2563eb;}
+.nav-item i{display:block;font-size:20px;margin-bottom:2px;}
 </style>
 </head>
 <body>
@@ -23,27 +25,22 @@ button{width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;
 <!-- DASHBOARD -->
 <div class="page active" id="dashboard">
   <div class="header">🚗 Car Advert App</div>
-
   <input type="text" id="carName" placeholder="Car Name">
   <input type="text" id="year" placeholder="Year">
   <input type="text" id="price" placeholder="Price">
   <input type="text" id="dealerPhone" placeholder="Dealer WhatsApp Number (234XXXXXXXXXX)">
-
   <select id="condition">
     <option>Condition</option>
     <option>Brand New</option>
     <option>Foreign Used</option>
     <option>Nigerian Used</option>
   </select>
-
   <div class="file-box">
     📸 Upload Images
     <input type="file" id="mediaInput" multiple accept="image/*">
   </div>
-
   <button onclick="generatePost()">✨ Generate Post</button>
   <button onclick="sharePost()">📤 Share Post</button>
-
   <div class="output" id="result">Your generated advert will appear here...</div>
 </div>
 
@@ -57,7 +54,6 @@ button{width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;
 <div class="page" id="settings">
   <div class="header">⚙ Settings</div>
   <input type="text" id="dealerName" placeholder="Change Dealer Name">
-  <input type="text" id="dealerPhoneSettings" placeholder="Dealer WhatsApp Number (234XXXXXXXXXX)">
   <input type="password" id="dealerPin" placeholder="Change PIN">
   <button onclick="saveSettings()">Save Settings</button>
 </div>
@@ -81,41 +77,22 @@ button{width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;
 </div>
 
 <!-- BOTTOM NAV -->
-<!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <div class="nav-item active" onclick="switchPage('dashboard', this)">
-    🏠<br><span style="font-size:10px;">Dashboard</span>
-  </div>
-  <div class="nav-item" onclick="switchPage('history', this)">
-    🕘<br><span style="font-size:10px;">History</span>
-  </div>
-  <div class="nav-item" onclick="switchPage('settings', this)">
-    ⚙<br><span style="font-size:10px;">Settings</span>
-  </div>
-  <div class="nav-item" onclick="switchPage('profile', this)">
-    👤<br><span style="font-size:10px;">Profile</span>
-  </div>
+  <div class="nav-item active" onclick="switchPage('dashboard', this)"><i>🏠</i>Dashboard</div>
+  <div class="nav-item" onclick="switchPage('history', this)"><i>🕘</i>History</div>
+  <div class="nav-item" onclick="switchPage('settings', this)"><i>⚙</i>Settings</div>
+  <div class="nav-item" onclick="switchPage('profile', this)"><i>👤</i>Profile</div>
 </div>
 
 <script>
-/* ===============================
-   DATABASE & APP LOGIC
-================================= */
+/* DATABASE */
 let db;
-let request = indexedDB.open("CarMarketingDB", 1);
-request.onupgradeneeded = function(e){
-  db = e.target.result;
-  db.createObjectStore("cars", { keyPath: "id", autoIncrement: true });
-};
-request.onsuccess = function(e){
-  db = e.target.result;
-  loadHistory();
-  loadProfile();
-  loadStaff();
-};
+let request = indexedDB.open("CarMarketingDB",1);
+request.onupgradeneeded = function(e){db=e.target.result;db.createObjectStore("cars",{keyPath:"id",autoIncrement:true});};
+request.onsuccess=function(e){db=e.target.result;loadHistory();loadProfile();loadStaff();};
 
 /* PAGE SWITCH */
-function switchPage(pageId, element){
+function switchPage(pageId,element){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(pageId).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -124,67 +101,52 @@ function switchPage(pageId, element){
 
 /* SETTINGS */
 function saveSettings(){
-  let name = document.getElementById("dealerName").value.trim();
-  let phone = document.getElementById("dealerPhoneSettings").value.trim();
-  let pin = document.getElementById("dealerPin").value.trim();
-
-  if(name) localStorage.setItem("dealerName", name);
-  if(phone) localStorage.setItem("dealerPhone", phone);
-  if(pin) localStorage.setItem("dealerPin", pin);
-
+  let name=document.getElementById("dealerName").value;
+  let pin=document.getElementById("dealerPin").value;
+  if(name)localStorage.setItem("dealerName",name);
+  if(pin)localStorage.setItem("dealerPin",pin);
   alert("Settings saved!");
   loadProfile();
 }
 
 function loadProfile(){
-  let name = localStorage.getItem("dealerName") || "Eddie Motors";
-  document.getElementById("profileInfo").innerHTML =
-    "Dealer: " + name + "<br><br>Status: Active";
+  let name=localStorage.getItem("dealerName")||"Eddie Motors";
+  document.getElementById("profileInfo").innerHTML="Dealer: "+name+"<br><br>Status: Active";
 }
 
-/* SAVE TO HISTORY */
-function saveToHistory(text, image){
-  let transaction = db.transaction(["cars"], "readwrite");
-  let store = transaction.objectStore("cars");
+/* HISTORY */
+function saveToHistory(text,image){
+  let transaction=db.transaction(["cars"],"readwrite");
+  let store=transaction.objectStore("cars");
   store.add({text,text,image,image,date:new Date().toLocaleString()});
-  transaction.oncomplete = loadHistory;
+  transaction.oncomplete=loadHistory;
 }
 
-/* LOAD HISTORY */
 function loadHistory(){
-  let historyBox = document.querySelector("#history .output");
-  historyBox.innerHTML = "";
-  let transaction = db.transaction(["cars"], "readonly");
-  let store = transaction.objectStore("cars");
-  store.openCursor().onsuccess = function(e){
-    let cursor = e.target.result;
+  let historyBox=document.querySelector("#history .output");
+  historyBox.innerHTML="";
+  let transaction=db.transaction(["cars"],"readonly");
+  let store=transaction.objectStore("cars");
+  store.openCursor().onsuccess=function(e){
+    let cursor=e.target.result;
     if(cursor){
-      let item = cursor.value;
-      let imageURL = item.image ? URL.createObjectURL(item.image) : "";
-      historyBox.innerHTML += `
-        <div style="margin-bottom:15px;padding:12px;background:#1e293b;border-radius:10px;">
-          <small style="color:#9ca3af;">${item.date}</small>
-          ${item.image ? `<img src="${imageURL}" style="width:100%;border-radius:8px;margin-top:8px;">` : ""}
-          <div style="margin-top:8px;white-space:pre-line;">${item.text}</div>
-          <button onclick="deleteCar(${item.id})"
-            style="background:#dc2626;margin-top:8px;padding:6px;border:none;border-radius:6px;color:white;">
-            Delete
-          </button>
-        </div>`;
+      let item=cursor.value;
+      let imageURL=item.image?URL.createObjectURL(item.image):"";
+      historyBox.innerHTML+=`<div style="margin-bottom:15px;padding:12px;background:#1e293b;border-radius:10px;">
+        <small style="color:#9ca3af;">${item.date}</small>
+        ${item.image?`<img src="${imageURL}" style="width:100%;border-radius:8px;margin-top:8px;">`:""}
+        <div style="margin-top:8px;white-space:pre-line;">${item.text}</div>
+        <button onclick="deleteCar(${item.id})" style="background:#dc2626;margin-top:8px;padding:6px;border:none;border-radius:6px;color:white;">Delete</button>
+      </div>`;
       cursor.continue();
     }
   };
 }
 
-function deleteCar(id){
-  let transaction = db.transaction(["cars"], "readwrite");
-  let store = transaction.objectStore("cars");
-  store.delete(id);
-  transaction.oncomplete = loadHistory;
-}
+function deleteCar(id){let transaction=db.transaction(["cars"],"readwrite");let store=transaction.objectStore("cars");store.delete(id);transaction.oncomplete=loadHistory;}
 
 /* RANDOM CAPTIONS */
-const captions = [
+const captions=[
   "🔥 Clean and affordable ride!",
   "💎 Premium condition, ready to drive!",
   "🚘 Smooth engine, zero worries!",
@@ -194,43 +156,41 @@ const captions = [
 
 /* GENERATE POST */
 function generatePost(){
-  let dealerName = localStorage.getItem("dealerName") || "Eddie Motors";
-  let dealerPhone = localStorage.getItem("dealerPhone") || "";
+  let dealerName=localStorage.getItem("dealerName")||"Eddie Motors";
+  let dealerPhone=document.getElementById("dealerPhone").value||"";
+  let name=document.getElementById("carName").value;
+  let year=document.getElementById("year").value;
+  let price=document.getElementById("price").value;
+  let condition=document.getElementById("condition").value;
+  let mediaInput=document.getElementById("mediaInput");
+  let result=document.getElementById("result");
+  let file=mediaInput.files[0];
+  let randomCaption=captions[Math.floor(Math.random()*captions.length)];
 
-  let name = document.getElementById("carName").value;
-  let year = document.getElementById("year").value;
-  let price = document.getElementById("price").value;
-  let condition = document.getElementById("condition").value;
-  let mediaInput = document.getElementById("mediaInput");
-  let result = document.getElementById("result");
+  let whatsappLink = dealerPhone ? "https://wa.me/" + dealerPhone.replace(/\D/g,"") : "";
 
-  let file = mediaInput.files[0];
-  let randomCaption = captions[Math.floor(Math.random() * captions.length)];
-  let whatsappLink = dealerPhone ? `https://wa.me/${dealerPhone}` : "";
-
-  let post = `🚗 ${name} (${year})
+  let post=`🚗 ${name} (${year})
 💰 Price: ${price}
 📌 Condition: ${condition}
 
 🏢 Dealer: ${dealerName}
 ${randomCaption}
+📲 Chat on WhatsApp: ${whatsappLink}`;
 
-📲 WhatsApp: ${whatsappLink}`;
-
-  result.innerText = post;
-  saveToHistory(post, file);
+  result.innerText=post;
+  saveToHistory(post,file);
 }
 
 /* SHARE */
 async function sharePost(){
-  let result = document.getElementById("result");
-  let mediaInput = document.getElementById("mediaInput");
-  const text = result.innerText;
-  const files = Array.from(mediaInput.files);
+  let result=document.getElementById("result");
+  let mediaInput=document.getElementById("mediaInput");
+  const text=result.innerText;
+  const files=Array.from(mediaInput.files);
 
   try{
-    if(navigator.share){
-      await navigator.share({ title: "Car Advert", text: text, files: files });
+    if(navigator.canShare && navigator.canShare({files})){
+      await navigator.share({title:"Car Advert",text,files});
     }else{
       await navigator.clipboard.writeText(text);
       alert("Caption copied! Paste it when posting.");
@@ -241,9 +201,7 @@ async function sharePost(){
   }
 }
 
-/* ===============================
-   STAFF MANAGEMENT SYSTEM
-================================= */
+/* STAFF MANAGEMENT */
 function getStaff(){return JSON.parse(localStorage.getItem("staffMembers"))||[];}
 function saveStaff(list){localStorage.setItem("staffMembers",JSON.stringify(list));}
 function addStaff(){
@@ -263,23 +221,15 @@ function loadStaff(){
   staffBox.innerHTML="";
   if(staff.length===0){staffBox.innerHTML="No staff added yet."; return;}
   staff.forEach((member,index)=>{
-    staffBox.innerHTML += `
-      <div style="margin-bottom:10px;padding:10px;background:#1e293b;border-radius:8px;">
+    staffBox.innerHTML+=`<div style="margin-bottom:10px;padding:10px;background:#1e293b;border-radius:8px;">
         <strong>${member.name}</strong><br>
         <small>${member.role}</small><br>
-        <button onclick="deleteStaff(${index})"
-          style="background:#dc2626;margin-top:6px;padding:5px;border:none;border-radius:6px;color:white;">
-          Delete
-        </button>
+        <button onclick="deleteStaff(${index})" style="background:#dc2626;margin-top:6px;padding:5px;border:none;border-radius:6px;color:white;">Delete</button>
       </div>`;
   });
 }
-function deleteStaff(index){
-  let staff=getStaff();
-  staff.splice(index,1);
-  saveStaff(staff);
-  loadStaff();
-}
+function deleteStaff(index){let staff=getStaff();staff.splice(index,1);saveStaff(staff);loadStaff();}
 </script>
+
 </body>
     </html>
