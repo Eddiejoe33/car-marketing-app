@@ -100,14 +100,10 @@ function switchPage(pageId,element){
 }
 
 /* SETTINGS */
-function saveSettings(){
-  let name=document.getElementById("dealerName").value;
-  let pin=document.getElementById("dealerPin").value;
-  if(name)localStorage.setItem("dealerName",name);
-  if(pin)localStorage.setItem("dealerPin",pin);
-  alert("Settings saved!");
-  loadProfile();
-}
+function saveSettings() {
+  localStorage.setItem("dealerName", document.getElementById("dealerName").value);
+  localStorage.setItem("dealerPhone", document.getElementById("dealerPhone").value);
+  }
 
 function loadProfile(){
   let name=localStorage.getItem("dealerName")||"Eddie Motors";
