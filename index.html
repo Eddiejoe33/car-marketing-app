@@ -179,23 +179,23 @@ ${randomCaption}
 
 /* SHARE */
 async function sharePost(){
-  let result=document.getElementById("result");
-  let mediaInput=document.getElementById("mediaInput");
-  const text=result.innerText;
-  const files=Array.from(mediaInput.files);
+  let result = document.getElementById("result");
+  let mediaInput = document.getElementById("mediaInput");
 
-  try{
-    if(navigator.canShare && navigator.canShare({files})){
-      await navigator.share({title:"Car Advert",text,files});
-    }else{
-      await navigator.clipboard.writeText(text);
-      alert("Caption copied! Paste it when posting.");
-    }
-  }catch(error){
-    await navigator.clipboard.writeText(text);
-    alert("Caption copied! Paste it when posting.");
+  const text = result.innerText;
+  const files = Array.from(mediaInput.files);
+
+  if(navigator.canShare && navigator.canShare({ files })){
+    await navigator.share({
+      title: "Car Advert",
+      text: text,
+      files: files
+    });
+  } else {
+    // No popup! Just show message inside the app
+    result.innerText += "\n⚠ Sharing not supported on this device. Copy your caption and post manually.";
   }
-}
+  }
 
 /* STAFF MANAGEMENT */
 function getStaff(){return JSON.parse(localStorage.getItem("staffMembers"))||[];}
