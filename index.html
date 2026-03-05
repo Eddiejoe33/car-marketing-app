@@ -3,267 +3,386 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚗 Car Marketing App</title>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
 html,body{height:100%;background:#0f172a;color:white;}
-.page{display:none;padding:15px;padding-bottom:100px;min-height:100vh;overflow-y:auto;}
+
+.page{display:none;padding:15px;padding-bottom:100px;min-height:100vh;}
 .page.active{display:block;}
+
 .header{text-align:center;font-size:22px;font-weight:bold;margin-bottom:15px;}
-input,select{width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;background:#1e293b;color:white;font-size:15px;}
-.file-box{background:#1e293b;padding:10px;border-radius:8px;margin-bottom:10px;}
-button{width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;background:#2563eb;color:white;font-weight:bold;font-size:15px;cursor:pointer;}
-.output{background:#1e293b;padding:10px;border-radius:8px;font-size:14px;}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:#111827;display:flex;justify-content:space-around;align-items:center;border-top:1px solid #1f2937;}
-.nav-item{flex:1;text-align:center;color:#9ca3af;font-size:14px;padding-top:6px;transition:0.3s;}
-.nav-item.active{color:#2563eb;font-weight:bold;border-top:3px solid #2563eb;}
+
+input,select{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:none;
+border-radius:8px;
+background:#1e293b;
+color:white;
+}
+
+.file-box{
+background:#1e293b;
+padding:10px;
+border-radius:8px;
+margin-bottom:10px;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:none;
+border-radius:8px;
+background:#2563eb;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.output{
+background:#1e293b;
+padding:10px;
+border-radius:8px;
+white-space:pre-line;
+}
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:60px;
+background:#111827;
+display:flex;
+justify-content:space-around;
+align-items:center;
+border-top:1px solid #1f2937;
+}
+
+.nav-item{
+flex:1;
+text-align:center;
+color:#9ca3af;
+padding-top:6px;
+}
+
+.nav-item.active{
+color:#2563eb;
+font-weight:bold;
+border-top:3px solid #2563eb;
+}
 </style>
 </head>
+
 <body>
 
 <!-- DASHBOARD -->
 <div class="page active" id="dashboard">
-  <div class="header">🚗 Elegant Car App</div>
 
-  <input type="text" id="carName" placeholder="Car Name">
-  <input type="text" id="year" placeholder="Year">
-  <input type="text" id="price" placeholder="Price">
-  <input type="text" id="dealerPhone" placeholder="Dealer Phone Number">
+<div class="header">🚗 Elegant Car App</div>
 
-  <select id="condition">
-    <option>Condition</option>
-    <option>Brand New</option>
-    <option>Foreign Used</option>
-    <option>Nigerian Used</option>
-  </select>
+<input type="text" id="carName" placeholder="Car Name">
 
-  <div class="file-box">
-    📸 Upload Images
-    <input type="file" id="mediaInput" multiple accept="image/*">
-  </div>
+<input type="text" id="year" placeholder="Year">
 
-  <button onclick="generatePost()">✨ Generate Post</button>
-  <button onclick="sharePost()">📤 Share Post</button>
+<input type="text" id="price" placeholder="Price">
 
-  <div class="output" id="result">
-    Your generated advert will appear here...
-  </div>
+<select id="condition">
+<option>Condition</option>
+<option>Brand New</option>
+<option>Foreign Used</option>
+<option>Nigerian Used</option>
+</select>
+
+<div class="file-box">
+📸 Upload Images
+<input type="file" id="mediaInput" accept="image/*">
+</div>
+
+<button onclick="generatePost()">✨ Generate Post</button>
+
+<button onclick="sharePost()">📤 Share Post</button>
+
+<div class="output" id="result">
+Your generated advert will appear here...
+</div>
+
 </div>
 
 <!-- HISTORY -->
 <div class="page" id="history">
-  <div class="header">🕘 History</div>
-  <div class="output"></div>
+
+<div class="header">🕘 History</div>
+
+<div class="output" id="historyBox"></div>
+
 </div>
 
 <!-- SETTINGS -->
 <div class="page" id="settings">
-  <div class="header">⚙ Settings</div>
-  <input type="text" id="dealerName" placeholder="Change Dealer Name">
-  <input type="password" id="dealerPin" placeholder="Change PIN">
-  <button onclick="saveSettings()">Save Settings</button>
+
+<div class="header">⚙ Settings</div>
+
+<input type="text" id="dealerName" placeholder="Dealer Name">
+
+<input type="text" id="dealerPhone" placeholder="WhatsApp Number (234xxxxxxxxxx)">
+
+<button onclick="saveSettings()">Save Settings</button>
+
 </div>
 
 <!-- PROFILE -->
 <div class="page" id="profile">
-  <div class="header">👤 Company Profile</div>
-  <div class="output" id="profileInfo"></div>
 
-  <div style="margin-top:20px;">
-    <h3 style="margin-bottom:10px;">➕ Add Staff Member</h3>
-    <input type="text" id="staffName" placeholder="Staff Name">
-    <input type="text" id="staffRole" placeholder="Staff Role (e.g Sales Manager)">
-    <button onclick="addStaff()">Add Staff</button>
-  </div>
+<div class="header">👤 Company Profile</div>
 
-  <div style="margin-top:20px;">
-    <h3 style="margin-bottom:10px;">👥 Staff Members</h3>
-    <div class="output" id="staffList"></div>
-  </div>
+<div class="output" id="profileInfo"></div>
+
+<h3 style="margin-top:20px">Add Staff</h3>
+
+<input type="text" id="staffName" placeholder="Staff Name">
+
+<input type="text" id="staffRole" placeholder="Staff Role">
+
+<button onclick="addStaff()">Add Staff</button>
+
+<div class="output" id="staffList" style="margin-top:10px"></div>
+
 </div>
 
-<!-- BOTTOM NAV -->
+<!-- NAVIGATION -->
+
 <div class="bottom-nav">
-  <div class="nav-item active" onclick="switchPage('dashboard', this)">🏠 Dashboard</div>
-  <div class="nav-item" onclick="switchPage('history', this)">🕘 History</div>
-  <div class="nav-item" onclick="switchPage('settings', this)">⚙ Settings</div>
-  <div class="nav-item" onclick="switchPage('profile', this)">👤 Profile</div>
+
+<div class="nav-item active" onclick="switchPage('dashboard',this)">🏠</div>
+
+<div class="nav-item" onclick="switchPage('history',this)">🕘</div>
+
+<div class="nav-item" onclick="switchPage('settings',this)">⚙</div>
+
+<div class="nav-item" onclick="switchPage('profile',this)">👤</div>
+
 </div>
 
 <script>
-// DATABASE
-let db;
-let request = indexedDB.open("CarMarketingDB", 1);
-request.onupgradeneeded = function(e){
-  db = e.target.result;
-  db.createObjectStore("cars", { keyPath: "id", autoIncrement: true });
-};
-request.onsuccess = function(e){
-  db = e.target.result;
-  loadHistory();
-  loadProfile();
-  loadStaff();
-};
 
-// NAVIGATION
-function switchPage(pageId, element){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(pageId).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  element.classList.add('active');
+function switchPage(page,el){
+
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"))
+
+document.getElementById(page).classList.add("active")
+
+document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"))
+
+el.classList.add("active")
+
 }
 
-// SETTINGS
-function saveSettings() {
-  localStorage.setItem("dealerName", document.getElementById("dealerName").value);
-  localStorage.setItem("dealerPhone", document.getElementById("dealerPhone").value);
-                          }
+function saveSettings(){
+
+let name=document.getElementById("dealerName").value
+
+let phone=document.getElementById("dealerPhone").value
+
+if(name)localStorage.setItem("dealerName",name)
+
+if(phone)localStorage.setItem("dealerPhone",phone)
+
+loadProfile()
+
+}
+
 function loadProfile(){
-  let name = localStorage.getItem("dealerName") || "Eddie Motors";
-  document.getElementById("profileInfo").innerHTML =
-    "Dealer: " + name + "<br><br>Status: Active";
+
+let name=localStorage.getItem("dealerName")||"My Car Business"
+
+let phone=localStorage.getItem("dealerPhone")||""
+
+document.getElementById("profileInfo").innerHTML=
+
+"Dealer: "+name+"<br><br>WhatsApp: "+phone
+
 }
 
-// HISTORY
-function saveToHistory(text,image){
-  let transaction = db.transaction(["cars"], "readwrite");
-  let store = transaction.objectStore("cars");
-  store.add({text,text,image,image,date:new Date().toLocaleString()});
-  transaction.oncomplete = loadHistory;
-}
-function loadHistory(){
-  let historyBox = document.querySelector("#history .output");
-  historyBox.innerHTML = "";
-  let transaction = db.transaction(["cars"], "readonly");
-  let store = transaction.objectStore("cars");
-  store.openCursor().onsuccess = function(e){
-    let cursor = e.target.result;
-    if(cursor){
-      let item = cursor.value;
-      let imageURL = item.image ? URL.createObjectURL(item.image) : "";
-      historyBox.innerHTML += `
-        <div style="margin-bottom:15px;padding:12px;background:#1e293b;border-radius:10px;">
-          <small style="color:#9ca3af;">${item.date}</small>
-          ${item.image ? `<img src="${imageURL}" style="width:100%;border-radius:8px;margin-top:8px;">` : ""}
-          <div style="margin-top:8px;white-space:pre-line;">${item.text}</div>
-          <button onclick="deleteCar(${item.id})"
-            style="background:#dc2626;margin-top:8px;padding:6px;border:none;border-radius:6px;color:white;">
-            Delete
-          </button>
-        </div>`;
-      cursor.continue();
-    }
-  };
-}
-function deleteCar(id){
-  let transaction = db.transaction(["cars"], "readwrite");
-  let store = transaction.objectStore("cars");
-  store.delete(id);
-  transaction.oncomplete = loadHistory;
-}
+loadProfile()
 
-// RANDOM CAPTIONS
-const captions = [
-  "🔥 Clean and affordable ride!",
-  "💎 Premium condition, ready to drive!",
-  "🚘 Smooth engine, zero worries!",
-  "⚡ Fast deal — serious buyers only!",
-  "💰 Best price in the market!"
-];
+const captions=[
 
-// GENERATE POST
+"🔥 Clean car, ready to drive",
+
+"💎 Premium condition",
+
+"🚗 Smooth engine guaranteed",
+
+"💰 Best deal available",
+
+"⚡ Serious buyers only"
+
+]
+
 function generatePost(){
-  let dealerName = localStorage.getItem("dealerName") || "Eddie Motors";
-  let name = document.getElementById("carName").value;
-  let year = document.getElementById("year").value;
-  let price = document.getElementById("price").value;
-  let phone = document.getElementById("dealerPhone").value;
-  let condition = document.getElementById("condition").value;
-  let mediaInput = document.getElementById("mediaInput");
-  let result = document.getElementById("result");
-  let file = mediaInput.files[0];
-  let randomCaption = captions[Math.floor(Math.random() * captions.length)];
 
-  let post = `🚗 ${name} (${year})
+let car=document.getElementById("carName").value
+
+let year=document.getElementById("year").value
+
+let price=document.getElementById("price").value
+
+let condition=document.getElementById("condition").value
+
+let dealer=localStorage.getItem("dealerName")||"Dealer"
+
+let phone=localStorage.getItem("dealerPhone")||""
+
+let caption=captions[Math.floor(Math.random()*captions.length)]
+
+let whatsapp=phone?"https://wa.me/"+phone:""
+
+let post=`🚗 ${car} (${year})
+
 💰 Price: ${price}
+
 📌 Condition: ${condition}
-📞 Contact: ${phone}
-🏢 Dealer: ${dealerName}
 
-${randomCaption}
-📲 DM now to secure this deal!`;
+🏢 Dealer: ${dealer}
 
-  result.innerText = post;
-  saveToHistory(post, file);
+${caption}
+
+📲 WhatsApp:
+${whatsapp}`
+
+document.getElementById("result").innerText=post
+
+saveHistory(post)
+
 }
 
-// SHARE POST
-async function sharePost(){
+function sharePost(){
 
-  let result = document.getElementById("result");
-  let mediaInput = document.getElementById("mediaInput");
+let text=document.getElementById("result").innerText
 
-  const text = result.innerText;
-  const files = Array.from(mediaInput.files);
+if(navigator.share){
 
-  try{
+navigator.share({text:text})
 
-    if(navigator.share){
-      await navigator.share({
-        title: "Car Advert",
-        text: text,
-        files: files
-      });
-    }else{
-      await navigator.clipboard.writeText(text);
-      alert("Caption copied! Paste it when posting.");
-    }
+}else{
 
-  }catch(error){
+navigator.clipboard.writeText(text)
 
-    await navigator.clipboard.writeText(text);
-    alert("Caption copied! Paste it when posting.");
-    
-  }
+}
 
-  }
+}
 
-// STAFF MANAGEMENT
-function getStaff(){return JSON.parse(localStorage.getItem("staffMembers"))||[];}
-function saveStaff(list){localStorage.setItem("staffMembers",JSON.stringify(list));}
+function saveHistory(text){
+
+let history=JSON.parse(localStorage.getItem("history")||"[]")
+
+history.unshift(text)
+
+localStorage.setItem("history",JSON.stringify(history))
+
+loadHistory()
+
+}
+
+function loadHistory(){
+
+let history=JSON.parse(localStorage.getItem("history")||"[]")
+
+let box=document.getElementById("historyBox")
+
+box.innerHTML=""
+
+history.forEach(item=>{
+
+box.innerHTML+=`<div style="margin-bottom:10px">${item}</div>`
+
+})
+
+}
+
+loadHistory()
+
+function getStaff(){
+
+return JSON.parse(localStorage.getItem("staff")||"[]")
+
+}
+
+function saveStaff(list){
+
+localStorage.setItem("staff",JSON.stringify(list))
+
+}
+
 function addStaff(){
-  let name=document.getElementById("staffName").value.trim();
-  let role=document.getElementById("staffRole").value.trim();
-  if(!name||!role){alert("Enter staff name and role");return;}
-  let staff=getStaff();
-  staff.push({name,role});
-  saveStaff(staff);
-  document.getElementById("staffName").value="";
-  document.getElementById("staffRole").value="";
-  loadStaff();
+
+let name=document.getElementById("staffName").value
+
+let role=document.getElementById("staffRole").value
+
+if(!name||!role)return
+
+let staff=getStaff()
+
+staff.push({name,role})
+
+saveStaff(staff)
+
+document.getElementById("staffName").value=""
+
+document.getElementById("staffRole").value=""
+
+loadStaff()
+
 }
+
 function loadStaff(){
-  let staffBox=document.getElementById("staffList");
-  let staff=getStaff();
-  staffBox.innerHTML="";
-  if(staff.length===0){staffBox.innerHTML="No staff added yet."; return;}
-  staff.forEach((member,index)=>{
-    staffBox.innerHTML += `
-      <div style="margin-bottom:10px;padding:10px;background:#1e293b;border-radius:8px;">
-        <strong>${member.name}</strong><br>
-        <small>${member.role}</small><br>
-        <button onclick="deleteStaff(${index})"
-          style="background:#dc2626;margin-top:6px;padding:5px;border:none;border-radius:6px;color:white;">
-          Delete
-        </button>
-      </div>`;
-  });
+
+let staff=getStaff()
+
+let box=document.getElementById("staffList")
+
+box.innerHTML=""
+
+staff.forEach((s,i)=>{
+
+box.innerHTML+=`
+
+<div style="margin-bottom:10px">
+
+<b>${s.name}</b><br>
+
+${s.role}
+
+<button onclick="deleteStaff(${i})">Delete</button>
+
+</div>
+
+`
+
+})
+
 }
-function deleteStaff(index){
-  let staff=getStaff();
-  staff.splice(index,1);
-  saveStaff(staff);
-  loadStaff();
+
+function deleteStaff(i){
+
+let staff=getStaff()
+
+staff.splice(i,1)
+
+saveStaff(staff)
+
+loadStaff()
+
 }
+
+loadStaff()
+
 </script>
+
 </body>
   </html>
