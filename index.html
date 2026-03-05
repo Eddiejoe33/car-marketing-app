@@ -168,7 +168,6 @@ button{
   <div class="nav-item" onclick="switchPage('settings', this)">⚙ Settings</div>
   <div class="nav-item" onclick="switchPage('profile', this)">👤 Profile</div>
 </div>
-
 <script>
 let db;
 
@@ -277,14 +276,18 @@ const captions = [
   "💰 Best price in the market!"
 ];
 
-/* GENERATE POST */
+/* GENERATE POST (FIXED) */
 function generatePost(){
+
   let dealerName = localStorage.getItem("dealerName") || "Eddie Motors";
 
-  let name = carName.value;
-  let year = year.value;
-  let price = price.value;
-  let condition = condition.value;
+  let name = document.getElementById("carName").value;
+  let year = document.getElementById("year").value;
+  let price = document.getElementById("price").value;
+  let condition = document.getElementById("condition").value;
+  let mediaInput = document.getElementById("mediaInput");
+  let result = document.getElementById("result");
+
   let file = mediaInput.files[0];
 
   let randomCaption = captions[Math.floor(Math.random() * captions.length)];
@@ -304,6 +307,10 @@ ${randomCaption}
 
 /* SHARE */
 async function sharePost(){
+
+  let result = document.getElementById("result");
+  let mediaInput = document.getElementById("mediaInput");
+
   const text = result.innerText;
   const files = Array.from(mediaInput.files);
 
@@ -314,10 +321,10 @@ async function sharePost(){
       files: files
     });
   }else{
-    alert("Sharing not supported.");
+    alert("Sharing not supported on this device.");
   }
 }
-</script>
+  </script>
 
 </body>
   </html>
