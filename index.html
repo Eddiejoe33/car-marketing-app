@@ -39,9 +39,7 @@ html,body{
   left:0;
   right:0;
   bottom:60px;
-  padding:14px;
-  display:none;
-  flex-direction:column;
+  overflow:auto;
 }
 
 .page.active{
@@ -217,13 +215,12 @@ request.onupgradeneeded = function(e){
 request.onsuccess = function(e){
   db = e.target.result;
   loadHistory();
-  loadProfile(); // Load dealer info
+  loadProfile();
 };
 
 request.onerror = function(){
   alert("Database failed to open");
 };
-
 
 /* =========================
    PAGE SWITCHING
@@ -232,19 +229,16 @@ function switchPage(pageId, element){
   document.querySelectorAll('.page').forEach(p=>{
     p.classList.remove('active');
   });
-
   document.getElementById(pageId).classList.add('active');
 
   document.querySelectorAll('.nav-item').forEach(n=>{
     n.classList.remove('active');
   });
-
   element.classList.add('active');
 }
 
-
 /* =========================
-   SAVE SETTINGS (REAL)
+   SAVE SETTINGS
 ========================= */
 function saveSettings(){
   let name = document.getElementById("dealerName").value;
@@ -259,7 +253,6 @@ function saveSettings(){
   localStorage.setItem("dealerPin", pin);
 
   alert("Settings saved successfully!");
-
   loadProfile();
 }
 
@@ -276,17 +269,16 @@ function loadProfile(){
   }
 }
 
-
 /* =========================
-   SAVE CAR TO INDEXEDDB
+   SAVE CAR TO INDEXEDDB (MULTIPLE IMAGES)
 ========================= */
-function saveToHistory(postText, imageFile){
+function saveToHistory(postText, imageFiles){
   let transaction = db.transaction(["cars"], "readwrite");
   let store = transaction.objectStore("cars");
 
   let entry = {
     text: postText,
-    image: imageFile,
+    images: Array.from(imageFiles), // save all selected files
     date: new Date().toLocaleString()
   };
 
@@ -297,13 +289,11 @@ function saveToHistory(postText, imageFile){
   };
 }
 
-
 /* =========================
-   LOAD HISTORY
+   LOAD HISTORY (MULTIPLE IMAGES)
 ========================= */
 function loadHistory(){
   if(!db) return;
-
   let historyBox = document.querySelector("#history .output");
   if(!historyBox) return;
 
@@ -323,12 +313,22 @@ function loadHistory(){
     }
 
     history.reverse().forEach(item=>{
-      let imageURL = item.image ? URL.createObjectURL(item.image) : "";
+      let imagesHTML = "";
+      if(item.images && item.images.length){
+        item.images.forEach(file=>{
+          let url = URL.createObjectURL(file);
+          imagesHTML += `<img src="${url}" style="width:100%; border-radius:6px; margin-top:6px;">`;
+        });
+      }
 
       historyBox.innerHTML += `
         <div style="margin-bottom:10px; padding:8px; background:#1e293b; border-radius:6px;">
-          <small style="color:#9ca3af;">${item.date}</small><br>
-          ${item.image ? `<img src="${imageURL}" style="width:100%; border-radius:6px; margin-top:6px;">` : ""}
+          <small style="color:#9ca3af;">${item.date}</small>
+          <button onclick="deleteCar(${item.id})" 
+            style="float:right; background:red; padding:4px 8px; border:none; border-radius:4px;">
+            Delete
+          </button><br>
+          ${imagesHTML}
           <div style="margin-top:6px;">${item.text}</div>
         </div>
       `;
@@ -336,6 +336,33 @@ function loadHistory(){
   };
 }
 
+/* =========================
+   DELETE CAR
+========================= */
+function deleteCar(id){
+  let transaction = db.transaction(["cars"], "readwrite");
+  let store = transaction.objectStore("cars");
+
+  store.delete(id);
+
+  transaction.oncomplete = function(){
+    loadHistory();
+  };
+}
+
+/* =========================
+   RANDOM CAPTIONS
+========================= */
+const captions = [
+  "🔥 Clean and affordable ride!",
+  "💎 Premium condition, ready to drive!",
+  "🚘 Smooth engine, zero worries!",
+  "⚡ Fast deal — serious buyers only!",
+  "💰 Best price in the market!",
+  "📍 Available for inspection today!",
+  "🔑 Drive home today!",
+  "🚗 Very neat and fuel efficient!"
+];
 
 /* =========================
    GENERATE POST
@@ -348,7 +375,9 @@ function generatePost(){
   let price = document.getElementById("price").value;
   let condition = document.getElementById("condition").value;
   let fileInput = document.getElementById("mediaInput");
-  let file = fileInput.files[0];
+  let files = fileInput.files;
+
+  let randomCaption = captions[Math.floor(Math.random() * captions.length)];
 
   let post = `🚗 ${name} (${year})
 💰 Price: ${price}
@@ -356,14 +385,13 @@ function generatePost(){
 
 🏢 Dealer: ${dealerName}
 
-🔥 Clean and affordable ride!
+${randomCaption}
 📲 DM now to secure this deal!`;
 
   document.getElementById("result").innerText = post;
 
-  saveToHistory(post, file);
+  saveToHistory(post, files);
 }
-
 
 /* =========================
    SHARE POST
@@ -383,7 +411,6 @@ async function sharePost() {
     alert("Sharing not supported on this browser.");
   }
 }
-
 </script>
 
 </body>
