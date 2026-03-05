@@ -157,8 +157,22 @@ button{
 
 <!-- PROFILE -->
 <div class="page" id="profile">
-  <div class="header">👤 Profile</div>
+  <div class="header">👤 Company Profile</div>
+
   <div class="output" id="profileInfo"></div>
+
+  <div style="margin-top:20px;">
+    <h3 style="margin-bottom:10px;">➕ Add Staff Member</h3>
+
+    <input type="text" id="staffName" placeholder="Staff Name">
+    <input type="text" id="staffRole" placeholder="Staff Role (e.g Sales Manager)">
+    <button onclick="addStaff()">Add Staff</button>
+  </div>
+
+  <div style="margin-top:20px;">
+    <h3 style="margin-bottom:10px;">👥 Staff Members</h3>
+    <div class="output" id="staffList"></div>
+  </div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -183,6 +197,7 @@ request.onsuccess = function(e){
   db = e.target.result;
   loadHistory();
   loadProfile();
+  loadStaff();
 };
 
 /* PAGE SWITCH */
@@ -325,6 +340,68 @@ async function sharePost(){
   }
 }
   </script>
+/* ===============================
+   STAFF MANAGEMENT SYSTEM
+================================= */
 
+function getStaff(){
+  return JSON.parse(localStorage.getItem("staffMembers")) || [];
+}
+
+function saveStaff(list){
+  localStorage.setItem("staffMembers", JSON.stringify(list));
+}
+
+function addStaff(){
+  let name = document.getElementById("staffName").value.trim();
+  let role = document.getElementById("staffRole").value.trim();
+
+  if(!name || !role){
+    alert("Enter staff name and role");
+    return;
+  }
+
+  let staff = getStaff();
+  staff.push({ name, role });
+
+  saveStaff(staff);
+
+  document.getElementById("staffName").value = "";
+  document.getElementById("staffRole").value = "";
+
+  loadStaff();
+}
+
+function loadStaff(){
+  let staffBox = document.getElementById("staffList");
+  let staff = getStaff();
+
+  staffBox.innerHTML = "";
+
+  if(staff.length === 0){
+    staffBox.innerHTML = "No staff added yet.";
+    return;
+  }
+
+  staff.forEach((member, index)=>{
+    staffBox.innerHTML += `
+      <div style="margin-bottom:10px;padding:10px;background:#1e293b;border-radius:8px;">
+        <strong>${member.name}</strong><br>
+        <small>${member.role}</small><br>
+        <button onclick="deleteStaff(${index})"
+          style="background:#dc2626;margin-top:6px;padding:5px;border:none;border-radius:6px;color:white;">
+          Delete
+        </button>
+      </div>
+    `;
+  });
+}
+
+function deleteStaff(index){
+  let staff = getStaff();
+  staff.splice(index,1);
+  saveStaff(staff);
+  loadStaff();
+}
 </body>
   </html>
