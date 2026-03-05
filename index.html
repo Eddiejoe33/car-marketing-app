@@ -19,20 +19,17 @@ html,body{
   overflow:hidden;
 }
 
-/* APP WRAPPER */
 .app{
   height:100%;
   display:flex;
   flex-direction:column;
 }
 
-/* PAGE AREA */
 .page-container{
   flex:1;
   position:relative;
 }
 
-/* EACH PAGE */
 .page{
   position:absolute;
   top:0;
@@ -47,7 +44,6 @@ html,body{
   flex-direction:column;
 }
 
-/* HEADER */
 .header{
   text-align:center;
   font-size:22px;
@@ -55,7 +51,6 @@ html,body{
   margin-bottom:10px;
 }
 
-/* FORM */
 input, select{
   width:100%;
   padding:10px;
@@ -67,7 +62,6 @@ input, select{
   font-size:15px;
 }
 
-/* FILE */
 .file-box{
   background:#1e293b;
   padding:10px;
@@ -75,7 +69,6 @@ input, select{
   margin-bottom:8px;
 }
 
-/* BUTTONS */
 button{
   width:100%;
   padding:10px;
@@ -88,7 +81,6 @@ button{
   font-size:15px;
 }
 
-/* OUTPUT */
 .output{
   background:#1e293b;
   padding:10px;
@@ -98,7 +90,6 @@ button{
   overflow:auto;
 }
 
-/* FIXED BOTTOM NAV */
 .bottom-nav{
   position:fixed;
   bottom:0;
@@ -128,44 +119,43 @@ button{
   border-top:3px solid #2563eb;
 }
 
-/* HISTORY POST FIX */
+/* ============ HISTORY FIX ============ */
 .history-post {
-  margin-bottom: 12px;
-  padding: 8px;
-  background: #1e293b;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
+  background:#1e293b;
+  padding:8px;
+  border-radius:8px;
+  margin-bottom:12px;
+  display:flex;
+  flex-direction:column;
 }
 
 .history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:6px;
 }
 
-.history-header button {
-  width: auto;
-  padding: 4px 8px;
-  font-size: 12px;
-  background: red;
-  color: white;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
+.history-delete-btn {
+  width:auto;
+  padding:4px 8px;
+  font-size:12px;
+  background:red;
+  color:white;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
 }
 
 .history-images img {
-  width: 100%;
-  border-radius: 6px;
-  margin-top: 6px;
+  width:100%;
+  border-radius:6px;
+  margin-top:6px;
 }
 </style>
 </head>
 
 <body>
-
 <div class="app">
 
   <div class="page-container">
@@ -202,7 +192,7 @@ button{
     <!-- HISTORY -->
     <div class="page" id="history">
       <div class="header">🕘 History</div>
-      <div class="output">No posts yet.</div>
+      <div class="output" id="historyBox">No posts yet.</div>
     </div>
 
     <!-- SETTINGS -->
@@ -221,7 +211,6 @@ button{
 
   </div>
 
-  <!-- FIXED BOTTOM NAV -->
   <div class="bottom-nav">
     <div class="nav-item active" onclick="switchPage('dashboard', this)">🏠 Dashboard</div>
     <div class="nav-item" onclick="switchPage('history', this)">🕘 History</div>
@@ -235,18 +224,16 @@ button{
 let db;
 
 let request = indexedDB.open("CarMarketingDB", 1);
-request.onupgradeneeded = function(e){
+request.onupgradeneeded = e => {
   db = e.target.result;
-  db.createObjectStore("cars", { keyPath: "id", autoIncrement: true });
+  db.createObjectStore("cars",{ keyPath:"id", autoIncrement:true });
 };
-request.onsuccess = function(e){
+request.onsuccess = e => {
   db = e.target.result;
   loadHistory();
   loadProfile();
 };
-request.onerror = function(){
-  alert("Database failed to open");
-};
+request.onerror = () => alert("Database failed to open");
 
 function switchPage(pageId, element){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -256,56 +243,50 @@ function switchPage(pageId, element){
 }
 
 function saveSettings(){
-  let name = document.getElementById("dealerName").value;
-  let pin = document.getElementById("dealerPin").value;
-
-  if(!name || !pin){ alert("Please fill all fields"); return; }
-
+  let name=document.getElementById("dealerName").value;
+  let pin=document.getElementById("dealerPin").value;
+  if(!name||!pin){ alert("Please fill all fields"); return; }
   localStorage.setItem("dealerName", name);
   localStorage.setItem("dealerPin", pin);
-
   alert("Settings saved successfully!");
   loadProfile();
 }
 
 function loadProfile(){
-  let name = localStorage.getItem("dealerName") || "Eddie Motors";
-  let status = "Active";
-  let profileBox = document.getElementById("profileInfo");
-  if(profileBox){
-    profileBox.innerHTML = `Dealer: ${name}<br><br>Status: ${status}`;
-  }
+  let name=localStorage.getItem("dealerName")||"Eddie Motors";
+  let status="Active";
+  let profileBox=document.getElementById("profileInfo");
+  if(profileBox) profileBox.innerHTML=`Dealer: ${name}<br><br>Status: ${status}`;
 }
 
-function saveToHistory(postText, imageFiles){
-  let transaction = db.transaction(["cars"], "readwrite");
-  let store = transaction.objectStore("cars");
-  let imagesArray = imageFiles ? Array.from(imageFiles) : [];
-  store.add({ text: postText, images: imagesArray, date: new Date().toLocaleString() });
-  transaction.oncomplete = function(){ loadHistory(); };
+function saveToHistory(postText, files){
+  let transaction=db.transaction(["cars"],"readwrite");
+  let store=transaction.objectStore("cars");
+  let arr=files?Array.from(files):[];
+  store.add({text:postText, images:arr, date:new Date().toLocaleString()});
+  transaction.oncomplete=()=>loadHistory();
 }
 
 function loadHistory(){
   if(!db) return;
-  let historyBox = document.querySelector("#history .output");
+  let historyBox=document.getElementById("historyBox");
   if(!historyBox) return;
-  historyBox.innerHTML = "";
-  let transaction = db.transaction(["cars"], "readonly");
-  let store = transaction.objectStore("cars");
-  let request = store.getAll();
-  request.onsuccess = function(){
-    let history = request.result;
-    if(history.length === 0){ historyBox.innerHTML = "No posts yet."; return; }
+  historyBox.innerHTML="";
+  let transaction=db.transaction(["cars"],"readonly");
+  let store=transaction.objectStore("cars");
+  let request=store.getAll();
+  request.onsuccess=function(){
+    let history=request.result;
+    if(history.length===0){ historyBox.innerHTML="No posts yet."; return; }
     history.reverse().forEach(item=>{
-      let imagesHTML = "";
-      if(item.images && item.images.length>0){
-        item.images.forEach(imgFile => imagesHTML += `<img src="${URL.createObjectURL(imgFile)}">`);
-      }
-      historyBox.innerHTML += `
+      let imagesHTML="";
+      if(item.images && item.images.length>0)
+        item.images.forEach(img=>imagesHTML+=`<img src="${URL.createObjectURL(img)}">`);
+      historyBox.innerHTML+=`
         <div class="history-post">
           <div class="history-header">
             <small style="color:#9ca3af;">${item.date}</small>
-            <button onclick="deleteCar(${item.id})">Delete</button>
+            <button class="history-delete-btn" onclick="deleteCar(${item.id})">Delete</button>
           </div>
           <div class="history-images">${imagesHTML}</div>
           <div style="margin-top:6px;">${item.text}</div>
@@ -315,13 +296,13 @@ function loadHistory(){
 }
 
 function deleteCar(id){
-  let transaction = db.transaction(["cars"], "readwrite");
-  let store = transaction.objectStore("cars");
+  let transaction=db.transaction(["cars"],"readwrite");
+  let store=transaction.objectStore("cars");
   store.delete(id);
-  transaction.oncomplete = function(){ loadHistory(); };
+  transaction.oncomplete=()=>loadHistory();
 }
 
-const captions = [
+const captions=[
   "🔥 Clean and affordable ride!",
   "💎 Premium condition, ready to drive!",
   "🚘 Smooth engine, zero worries!",
@@ -333,25 +314,31 @@ const captions = [
 ];
 
 function generatePost(){
-  let dealerName = localStorage.getItem("dealerName") || "Eddie Motors";
-  let name = document.getElementById("carName").value;
-  let year = document.getElementById("year").value;
-  let price = document.getElementById("price").value;
-  let condition = document.getElementById("condition").value;
-  let files = document.getElementById("mediaInput").files;
-  let post = `🚗 ${name} (${year})\n💰 Price: ${price}\n📌 Condition: ${condition}\n\n🏢 Dealer: ${dealerName}\n\n${captions[Math.floor(Math.random()*captions.length)]}\n📲 DM now to secure this deal!`;
-  document.getElementById("result").innerText = post;
+  let dealerName=localStorage.getItem("dealerName")||"Eddie Motors";
+  let name=document.getElementById("carName").value;
+  let year=document.getElementById("year").value;
+  let price=document.getElementById("price").value;
+  let condition=document.getElementById("condition").value;
+  let files=document.getElementById("mediaInput").files;
+  let post=`🚗 ${name} (${year})
+💰 Price: ${price}
+📌 Condition: ${condition}
+
+🏢 Dealer: ${dealerName}
+
+${captions[Math.floor(Math.random()*captions.length)]}
+📲 DM now to secure this deal!`;
+  document.getElementById("result").innerText=post;
   saveToHistory(post, files);
 }
 
-async function sharePost() {
-  const text = document.getElementById("result").innerText;
-  const files = Array.from(document.getElementById("mediaInput").files);
-  if(navigator.canShare && navigator.canShare({ files })){
-    await navigator.share({ title: "Car Advert", text, files });
-  } else { alert("Sharing not supported on this browser."); }
+async function sharePost(){
+  const text=document.getElementById("result").innerText;
+  const files=Array.from(document.getElementById("mediaInput").files);
+  if(navigator.canShare && navigator.canShare({files})){
+    await navigator.share({title:"Car Advert",text,files});
+  }else{ alert("Sharing not supported on this browser."); }
 }
 </script>
-
 </body>
-      </html>
+  </html>
