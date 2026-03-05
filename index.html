@@ -44,6 +44,7 @@ html,body{
 
 .page.active{
   display:flex;
+  flex-direction:column;
 }
 
 /* HEADER */
@@ -95,7 +96,7 @@ button{
   font-size:14px;
   flex:1;
   overflow:auto;
-  }
+}
 
 /* FIXED BOTTOM NAV */
 .bottom-nav{
@@ -125,6 +126,29 @@ button{
   color:#2563eb;
   font-weight:bold;
   border-top:3px solid #2563eb;
+}
+
+/* HISTORY POST FIX */
+.history-post {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: #1e293b;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.history-images img {
+  width: 100%;
+  border-radius: 6px;
+  margin-top: 6px;
 }
 </style>
 </head>
@@ -171,20 +195,17 @@ button{
     </div>
 
     <!-- SETTINGS -->
-   <div class="page" id="settings">
-  <div class="header">⚙ Settings</div>
-
-  <input type="text" id="dealerName" placeholder="Change Dealer Name">
-  <input type="password" id="dealerPin" placeholder="Change PIN">
-
-  <button onclick="saveSettings()">Save Settings</button>
-   </div>
+    <div class="page" id="settings">
+      <div class="header">⚙ Settings</div>
+      <input type="text" id="dealerName" placeholder="Change Dealer Name">
+      <input type="password" id="dealerPin" placeholder="Change PIN">
+      <button onclick="saveSettings()">Save Settings</button>
+    </div>
 
     <!-- PROFILE -->
     <div class="page" id="profile">
-  <div class="header">👤 Profile</div>
-  <div class="output" id="profileInfo"></div>
-    </div>
+      <div class="header">👤 Profile</div>
+      <div class="output" id="profileInfo"></div>
     </div>
 
   </div>
@@ -215,7 +236,7 @@ request.onupgradeneeded = function(e){
 request.onsuccess = function(e){
   db = e.target.result;
   loadHistory();
-  loadProfile(); // Load dealer info
+  loadProfile();
 };
 
 request.onerror = function(){
@@ -240,9 +261,8 @@ function switchPage(pageId, element){
   element.classList.add('active');
 }
 
-
 /* =========================
-   SAVE SETTINGS (REAL)
+   SAVE SETTINGS
 ========================= */
 function saveSettings(){
   let name = document.getElementById("dealerName").value;
@@ -274,17 +294,20 @@ function loadProfile(){
   }
 }
 
-
 /* =========================
    SAVE CAR TO INDEXEDDB
 ========================= */
-function saveToHistory(postText, imageFile){
+function saveToHistory(postText, imageFiles){
   let transaction = db.transaction(["cars"], "readwrite");
   let store = transaction.objectStore("cars");
 
+  // Save all selected images
+  let imagesArray = [];
+  if(imageFiles) imagesArray = Array.from(imageFiles);
+
   let entry = {
     text: postText,
-    image: imageFile,
+    images: imagesArray,
     date: new Date().toLocaleString()
   };
 
@@ -320,18 +343,21 @@ function loadHistory(){
     }
 
     history.reverse().forEach(item=>{
-      let imageURL = item.image ? URL.createObjectURL(item.image) : "";
+      let imagesHTML = "";
+      if(item.images && item.images.length > 0){
+        item.images.forEach(imgFile => {
+          let url = URL.createObjectURL(imgFile);
+          imagesHTML += `<img src="${url}">`;
+        });
+      }
 
       historyBox.innerHTML += `
-        <div style="margin-bottom:10px; padding:8px; background:#1e293b; border-radius:6px;">
-          <small style="color:#9ca3af;">${item.date}</small>
-          <button onclick="deleteCar(${item.id})" 
-            style="float:right; background:red; padding:4px 8px; border:none; border-radius:4px;">
-            Delete
-          </button><br>
-
-          ${item.image ? `<img src="${imageURL}" style="width:100%; border-radius:6px; margin-top:6px;">` : ""}
-          
+        <div class="history-post">
+          <div class="history-header">
+            <small style="color:#9ca3af;">${item.date}</small>
+            <button onclick="deleteCar(${item.id})">Delete</button>
+          </div>
+          <div class="history-images">${imagesHTML}</div>
           <div style="margin-top:6px;">${item.text}</div>
         </div>
       `;
@@ -351,7 +377,8 @@ function deleteCar(id){
   transaction.oncomplete = function(){
     loadHistory();
   };
-  }
+}
+
 /* =========================
    RANDOM CAPTIONS
 ========================= */
@@ -365,6 +392,7 @@ const captions = [
   "🔑 Drive home today!",
   "🚗 Very neat and fuel efficient!"
 ];
+
 /* =========================
    GENERATE POST
 ========================= */
@@ -376,7 +404,7 @@ function generatePost(){
   let price = document.getElementById("price").value;
   let condition = document.getElementById("condition").value;
   let fileInput = document.getElementById("mediaInput");
-  let file = fileInput.files[0];
+  let files = fileInput.files;
 
   let randomCaption = captions[Math.floor(Math.random() * captions.length)];
 
@@ -391,9 +419,8 @@ ${randomCaption}
 
   document.getElementById("result").innerText = post;
 
-  saveToHistory(post, file);
-  }
-
+  saveToHistory(post, files);
+}
 
 /* =========================
    SHARE POST
@@ -417,5 +444,4 @@ async function sharePost() {
 </script>
 
 </body>
-        </html>
-
+  </html>
