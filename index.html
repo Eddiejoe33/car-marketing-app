@@ -38,11 +38,10 @@ html,body{
   top:0;
   left:0;
   right:0;
-  bottom:60px; /* Leave space for bottom nav */
+  bottom:60px;
   padding:14px;
   display:none;
   flex-direction:column;
-  justify-content:space-between;
 }
 
 .page.active{
@@ -96,9 +95,9 @@ button{
   padding:10px;
   border-radius:8px;
   font-size:14px;
-  height:80px;
+  flex:1;
   overflow:auto;
-}
+  }
 
 /* FIXED BOTTOM NAV */
 .bottom-nav{
@@ -174,20 +173,20 @@ button{
     </div>
 
     <!-- SETTINGS -->
-    <div class="page" id="settings">
-      <div class="header">⚙ Settings</div>
-      <input type="text" placeholder="Change Dealer Name">
-      <input type="password" placeholder="Change PIN">
-      <button>Save Settings</button>
-    </div>
+   <div class="page" id="settings">
+  <div class="header">⚙ Settings</div>
+
+  <input type="text" id="dealerName" placeholder="Change Dealer Name">
+  <input type="password" id="dealerPin" placeholder="Change PIN">
+
+  <button onclick="saveSettings()">Save Settings</button>
+   </div>
 
     <!-- PROFILE -->
     <div class="page" id="profile">
-      <div class="header">👤 Profile</div>
-      <div class="output">
-        Dealer: Eddie Motors<br><br>
-        Status: Active
-      </div>
+  <div class="header">👤 Profile</div>
+  <div class="output" id="profileInfo"></div>
+    </div>
     </div>
 
   </div>
@@ -205,6 +204,9 @@ button{
 <script>
 let db;
 
+/* =========================
+   OPEN INDEXED DB
+========================= */
 let request = indexedDB.open("CarMarketingDB", 1);
 
 request.onupgradeneeded = function(e){
@@ -215,11 +217,17 @@ request.onupgradeneeded = function(e){
 request.onsuccess = function(e){
   db = e.target.result;
   loadHistory();
+  loadProfile(); // Load dealer info
 };
 
 request.onerror = function(){
   alert("Database failed to open");
 };
+
+
+/* =========================
+   PAGE SWITCHING
+========================= */
 function switchPage(pageId, element){
   document.querySelectorAll('.page').forEach(p=>{
     p.classList.remove('active');
@@ -234,6 +242,44 @@ function switchPage(pageId, element){
   element.classList.add('active');
 }
 
+
+/* =========================
+   SAVE SETTINGS (REAL)
+========================= */
+function saveSettings(){
+  let name = document.getElementById("dealerName").value;
+  let pin = document.getElementById("dealerPin").value;
+
+  if(!name || !pin){
+    alert("Please fill all fields");
+    return;
+  }
+
+  localStorage.setItem("dealerName", name);
+  localStorage.setItem("dealerPin", pin);
+
+  alert("Settings saved successfully!");
+
+  loadProfile();
+}
+
+function loadProfile(){
+  let name = localStorage.getItem("dealerName") || "Eddie Motors";
+  let status = "Active";
+
+  let profileBox = document.getElementById("profileInfo");
+  if(profileBox){
+    profileBox.innerHTML = `
+      Dealer: ${name}<br><br>
+      Status: ${status}
+    `;
+  }
+}
+
+
+/* =========================
+   SAVE CAR TO INDEXEDDB
+========================= */
 function saveToHistory(postText, imageFile){
   let transaction = db.transaction(["cars"], "readwrite");
   let store = transaction.objectStore("cars");
@@ -249,9 +295,18 @@ function saveToHistory(postText, imageFile){
   transaction.oncomplete = function(){
     loadHistory();
   };
-  }
+}
+
+
+/* =========================
+   LOAD HISTORY
+========================= */
 function loadHistory(){
+  if(!db) return;
+
   let historyBox = document.querySelector("#history .output");
+  if(!historyBox) return;
+
   historyBox.innerHTML = "";
 
   let transaction = db.transaction(["cars"], "readonly");
@@ -279,10 +334,15 @@ function loadHistory(){
       `;
     });
   };
-  }
+}
 
-window.onload = loadHistory;
+
+/* =========================
+   GENERATE POST
+========================= */
 function generatePost(){
+  let dealerName = localStorage.getItem("dealerName") || "Eddie Motors";
+
   let name = document.getElementById("carName").value;
   let year = document.getElementById("year").value;
   let price = document.getElementById("price").value;
@@ -294,14 +354,20 @@ function generatePost(){
 💰 Price: ${price}
 📌 Condition: ${condition}
 
+🏢 Dealer: ${dealerName}
+
 🔥 Clean and affordable ride!
 📲 DM now to secure this deal!`;
 
   document.getElementById("result").innerText = post;
 
   saveToHistory(post, file);
-  }
+}
 
+
+/* =========================
+   SHARE POST
+========================= */
 async function sharePost() {
   const text = document.getElementById("result").innerText;
   const input = document.getElementById("mediaInput");
