@@ -223,122 +223,186 @@ button{
 <script>
 let db;
 
+/* =========================
+   OPEN INDEXED DB
+========================= */
 let request = indexedDB.open("CarMarketingDB", 1);
-request.onupgradeneeded = e => {
+
+request.onupgradeneeded = function(e){
   db = e.target.result;
-  db.createObjectStore("cars",{ keyPath:"id", autoIncrement:true });
+  db.createObjectStore("cars", { keyPath: "id", autoIncrement: true });
 };
-request.onsuccess = e => {
+
+request.onsuccess = function(e){
   db = e.target.result;
   loadHistory();
-  loadProfile();
+  loadProfile(); // Load dealer info
 };
-request.onerror = () => alert("Database failed to open");
 
+request.onerror = function(){
+  alert("Database failed to open");
+};
+
+
+/* =========================
+   PAGE SWITCHING
+========================= */
 function switchPage(pageId, element){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active');
+  });
+
   document.getElementById(pageId).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.remove('active');
+  });
+
   element.classList.add('active');
 }
 
+
+/* =========================
+   SAVE SETTINGS (REAL)
+========================= */
 function saveSettings(){
-  let name=document.getElementById("dealerName").value;
-  let pin=document.getElementById("dealerPin").value;
-  if(!name||!pin){ alert("Please fill all fields"); return; }
+  let name = document.getElementById("dealerName").value;
+  let pin = document.getElementById("dealerPin").value;
+
+  if(!name || !pin){
+    alert("Please fill all fields");
+    return;
+  }
+
   localStorage.setItem("dealerName", name);
   localStorage.setItem("dealerPin", pin);
+
   alert("Settings saved successfully!");
+
   loadProfile();
 }
 
 function loadProfile(){
-  let name=localStorage.getItem("dealerName")||"Eddie Motors";
-  let status="Active";
-  let profileBox=document.getElementById("profileInfo");
-  if(profileBox) profileBox.innerHTML=`Dealer: ${name}<br><br>Status: ${status}`;
+  let name = localStorage.getItem("dealerName") || "Eddie Motors";
+  let status = "Active";
+
+  let profileBox = document.getElementById("profileInfo");
+  if(profileBox){
+    profileBox.innerHTML = `
+      Dealer: ${name}<br><br>
+      Status: ${status}
+    `;
+  }
 }
 
-function saveToHistory(postText, files){
-  let transaction=db.transaction(["cars"],"readwrite");
-  let store=transaction.objectStore("cars");
-  let arr=files?Array.from(files):[];
-  store.add({text:postText, images:arr, date:new Date().toLocaleString()});
-  transaction.oncomplete=()=>loadHistory();
+
+/* =========================
+   SAVE CAR TO INDEXEDDB
+========================= */
+function saveToHistory(postText, imageFile){
+  let transaction = db.transaction(["cars"], "readwrite");
+  let store = transaction.objectStore("cars");
+
+  let entry = {
+    text: postText,
+    image: imageFile,
+    date: new Date().toLocaleString()
+  };
+
+  store.add(entry);
+
+  transaction.oncomplete = function(){
+    loadHistory();
+  };
 }
 
+
+/* =========================
+   LOAD HISTORY
+========================= */
 function loadHistory(){
   if(!db) return;
-  let historyBox=document.getElementById("historyBox");
+
+  let historyBox = document.querySelector("#history .output");
   if(!historyBox) return;
-  historyBox.innerHTML="";
-  let transaction=db.transaction(["cars"],"readonly");
-  let store=transaction.objectStore("cars");
-  let request=store.getAll();
-  request.onsuccess=function(){
-    let history=request.result;
-    if(history.length===0){ historyBox.innerHTML="No posts yet."; return; }
+
+  historyBox.innerHTML = "";
+
+  let transaction = db.transaction(["cars"], "readonly");
+  let store = transaction.objectStore("cars");
+
+  let request = store.getAll();
+
+  request.onsuccess = function(){
+    let history = request.result;
+
+    if(history.length === 0){
+      historyBox.innerHTML = "No posts yet.";
+      return;
+    }
+
     history.reverse().forEach(item=>{
-      let imagesHTML="";
-      if(item.images && item.images.length>0)
-        item.images.forEach(img=>imagesHTML+=`<img src="${URL.createObjectURL(img)}">`);
-      historyBox.innerHTML+=`
-        <div class="history-post">
-          <div class="history-header">
-            <small style="color:#9ca3af;">${item.date}</small>
-            <button class="history-delete-btn" onclick="deleteCar(${item.id})">Delete</button>
-          </div>
-          <div class="history-images">${imagesHTML}</div>
+      let imageURL = item.image ? URL.createObjectURL(item.image) : "";
+
+      historyBox.innerHTML += `
+        <div style="margin-bottom:10px; padding:8px; background:#1e293b; border-radius:6px;">
+          <small style="color:#9ca3af;">${item.date}</small><br>
+          ${item.image ? `<img src="${imageURL}" style="width:100%; border-radius:6px; margin-top:6px;">` : ""}
           <div style="margin-top:6px;">${item.text}</div>
-        </div>`;
+        </div>
+      `;
     });
   };
 }
 
-function deleteCar(id){
-  let transaction=db.transaction(["cars"],"readwrite");
-  let store=transaction.objectStore("cars");
-  store.delete(id);
-  transaction.oncomplete=()=>loadHistory();
-}
 
-const captions=[
-  "🔥 Clean and affordable ride!",
-  "💎 Premium condition, ready to drive!",
-  "🚘 Smooth engine, zero worries!",
-  "⚡ Fast deal — serious buyers only!",
-  "💰 Best price in the market!",
-  "📍 Available for inspection today!",
-  "🔑 Drive home today!",
-  "🚗 Very neat and fuel efficient!"
-];
-
+/* =========================
+   GENERATE POST
+========================= */
 function generatePost(){
-  let dealerName=localStorage.getItem("dealerName")||"Eddie Motors";
-  let name=document.getElementById("carName").value;
-  let year=document.getElementById("year").value;
-  let price=document.getElementById("price").value;
-  let condition=document.getElementById("condition").value;
-  let files=document.getElementById("mediaInput").files;
-  let post=`🚗 ${name} (${year})
+  let dealerName = localStorage.getItem("dealerName") || "Eddie Motors";
+
+  let name = document.getElementById("carName").value;
+  let year = document.getElementById("year").value;
+  let price = document.getElementById("price").value;
+  let condition = document.getElementById("condition").value;
+  let fileInput = document.getElementById("mediaInput");
+  let file = fileInput.files[0];
+
+  let post = `🚗 ${name} (${year})
 💰 Price: ${price}
 📌 Condition: ${condition}
 
 🏢 Dealer: ${dealerName}
 
-${captions[Math.floor(Math.random()*captions.length)]}
+🔥 Clean and affordable ride!
 📲 DM now to secure this deal!`;
-  document.getElementById("result").innerText=post;
-  saveToHistory(post, files);
+
+  document.getElementById("result").innerText = post;
+
+  saveToHistory(post, file);
 }
 
-async function sharePost(){
-  const text=document.getElementById("result").innerText;
-  const files=Array.from(document.getElementById("mediaInput").files);
-  if(navigator.canShare && navigator.canShare({files})){
-    await navigator.share({title:"Car Advert",text,files});
-  }else{ alert("Sharing not supported on this browser."); }
+
+/* =========================
+   SHARE POST
+========================= */
+async function sharePost() {
+  const text = document.getElementById("result").innerText;
+  const input = document.getElementById("mediaInput");
+  const files = Array.from(input.files);
+
+  if (navigator.canShare && navigator.canShare({ files })) {
+    await navigator.share({
+      title: "Car Advert",
+      text: text,
+      files: files
+    });
+  } else {
+    alert("Sharing not supported on this browser.");
+  }
 }
+
 </script>
 </body>
   </html>
